@@ -478,7 +478,7 @@ class ConceptTerm(Base, OrmBase):
 
 
 class Qualifier(Base, OrmBase):
-    """Table of `<Qualifier>` element records."""
+    """Table of `<QualifierRecord>` element records."""
 
     # Set table name.
     __tablename__ = "qualifiers"

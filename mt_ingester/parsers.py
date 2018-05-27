@@ -513,17 +513,17 @@ class ParserXmlMeshBase(ParserXmlBase):
             dict: The parsed values of the contained elements.
         """
 
-        tree_numbers = []
+        concepts = []
 
         if element is None:
             return []
 
         for _element in element.findall("Concept"):
-            tree_numbers.append(
+            concepts.append(
                 self.parse_concept(_element)
             )
 
-        return tree_numbers
+        return concepts
 
     def parse_previous_indexing(
         self,
