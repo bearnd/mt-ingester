@@ -571,7 +571,7 @@ class ParserXmlMeshBase(ParserXmlBase):
 
         for _element in element.findall("PreviousIndexing"):
             previous_indexing.append(
-                self.parse_previous_indexing_list(_element)
+                self.parse_previous_indexing(_element)
             )
 
         return previous_indexing
