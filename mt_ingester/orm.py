@@ -219,6 +219,12 @@ class Term(Base, OrmBase):
         back_populates="terms",
     )
 
+    # Set table arguments.
+    __table_args__ = {
+        # Set table schema.
+        "schema": "mesh"
+    }
+
 
 class TermThesaurusId(Base, OrmBase):
     """Associative table between `Term` and `ThesaurusId` records."""
@@ -361,6 +367,12 @@ class Concept(Base, OrmBase):
         back_populates="concepts",
     )
 
+    # Set table arguments.
+    __table_args__ = {
+        # Set table schema.
+        "schema": "mesh"
+    }
+
 
 class ConceptRelatedConcept(Base, OrmBase):
     """Associative table between `Concept` and other `Concept` records
@@ -471,7 +483,7 @@ class ConceptTerm(Base, OrmBase):
     # Set table arguments.
     __table_args__ = (
         # Set unique constraint.
-        sqlalchemy.UniqueConstraint('descriptor_id', 'qualifier_id'),
+        sqlalchemy.UniqueConstraint('concept_id', 'term_id'),
         # Set table schema.
         {"schema": "mesh"}
     )
@@ -568,6 +580,12 @@ class Qualifier(Base, OrmBase):
         secondary="mesh.descriptor_allowable_qualifiers",
         back_populates="qualifiers",
     )
+
+    # Set table arguments.
+    __table_args__ = {
+        # Set table schema.
+        "schema": "mesh"
+    }
 
 
 class QualifierConcept(Base, OrmBase):
@@ -923,6 +941,12 @@ class Descriptor(Base, OrmBase):
         secondary="mesh.descriptor_concepts",
         back_populates="descriptors",
     )
+
+    # Set table arguments.
+    __table_args__ = {
+        # Set table schema.
+        "schema": "mesh"
+    }
 
 
 class DescriptorEntryCombination(Base, OrmBase):
@@ -1378,6 +1402,12 @@ class Supplemental(Base, OrmBase):
         back_populates="supplementals",
     )
 
+    # Set table arguments.
+    __table_args__ = {
+        # Set table schema.
+        "schema": "mesh"
+    }
+
 
 class SupplementalHeadingMappedTo(Base, OrmBase):
     """Associative table between `Descriptor` and `EntryCombination` records
@@ -1577,7 +1607,7 @@ class SupplementalPharmacologicalActionDescriptor(Base, OrmBase):
     __table_args__ = (
         # Set unique constraint.
         sqlalchemy.UniqueConstraint(
-            'descriptor_id',
+            'supplemental_id',
             'pharmacological_action_descriptor_id',
         ),
         # Set table schema.
