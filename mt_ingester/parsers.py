@@ -607,6 +607,11 @@ class ParserXmlMeshBase(ParserXmlBase):
             "DescriptorName": self._ets(element.find("DescriptorName")),
         }
 
+        # Remove the `*` that appears in some descriptor reference UIs.
+        descriptor_reference["DescriptorUI"] = descriptor_reference[
+            "DescriptorUI"
+        ].replace("*", "")
+
         return descriptor_reference
 
     def parse_qualifier_reference(
@@ -635,6 +640,11 @@ class ParserXmlMeshBase(ParserXmlBase):
             "QualifierUI": self._et(element.find("QualifierUI")),
             "QualifierName": self._ets(element.find("QualifierName")),
         }
+
+        # Remove the `*` that appears in some qualifier reference UIs.
+        qualifier_reference["QualifierUI"] = qualifier_reference[
+            "QualifierUI"
+        ].replace("*", "")
 
         return qualifier_reference
 
@@ -1204,7 +1214,7 @@ class ParserXmlMeshSupplementals(ParserXmlMeshBase):
 
         supplemental_record = {
             "SupplementalClass": SupplementalClassType.get_member(
-                self._eav(element, "SupplementalClass"),
+                self._eav(element, "SCRClass"),
             ),
             "SupplementalRecordUI": self._et(
                 element.find("SupplementalRecordUI"),
