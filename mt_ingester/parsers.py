@@ -146,12 +146,16 @@ class ParserXmlMeshBase(ParserXmlBase):
         element_month = element.find("Month")
         element_day = element.find("Day")
 
-        if not (element_year and element_month and element_day):
+        if (
+            element_year is None or
+            element_month is None or
+            element_day is None
+        ):
             return None
 
         year = self._et(element_year)
-        month = self._et(element_year)
-        day = self._et(element_year)
+        month = self._et(element_month)
+        day = self._et(element_day)
 
         if not (
             (year and year.isdigit()) and
