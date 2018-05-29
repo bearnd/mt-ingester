@@ -29,6 +29,46 @@ class IngesterDocumentBase(object):
             logger_level=kwargs.get("logger_level", "DEBUG")
         )
 
+    @staticmethod
+    def _get_dref_ui(
+        doc: dict
+    ) -> Union[str, None]:
+        """Retrieves the UI from a descriptor reference.
+
+        Args:
+            doc (dict): The descriptor reference.
+
+        Returns:
+            str: The descriptor UI or `None` if undefined.
+        """
+
+        if not doc:
+            return None
+
+        ui = doc.get("DescriptorReferredTo", {}).get("DescriptorUI")
+
+        return ui
+
+    @staticmethod
+    def _get_qref_ui(
+        doc: dict
+    ) -> Union[str, None]:
+        """Retrieves the UI from a qualifier reference.
+
+        Args:
+            doc (dict): The qualifier reference.
+
+        Returns:
+            str: The qualifier UI or `None` if undefined.
+        """
+
+        if not doc:
+            return None
+
+        ui = doc.get("QualifierReferredTo", {}).get("QualifierUI")
+
+        return ui
+
     @log_ingestion_of_document(document_name="TreeNumber")
     def ingest_tree_number(
         self,
@@ -318,76 +358,59 @@ class IngesterDocumentSupplemental(IngesterDocumentBase):
         # Upsert the `EntryCombination` records representing the
         # `<HeadingMappedTo>` elements and the `SupplementalHeadingMappedTo`
         # records.
-        for doc_heading_mapped_to in doc.get("HeadingMappedToList"):
-            # Upsert the `EntryCombination` record.
-            entry_combination_id = self.dal.iodu_entry_combination(
-                descriptor_id=self.dal.get_by_attrs(
-                    Descriptor,
-                    {
-                        "ui": doc_heading_mapped_to.get(
-                            "DescriptorReferredTo",
-                        ).get("DescriptorUI"),
-                    }
-                ),
-                qualifier_id=self.dal.get_by_attrs(
-                    Qualifier,
-                    {
-                        "ui": doc_heading_mapped_to.get(
-                            "QualifierReferredTo",
-                        ).get("QualifierUI"),
-                    }
-                ),
-                combination_type=None,
-            )
-            # Upsert the `SupplementalHeadingMappedTo` record.
-            self.dal.iodi_supplemental_heading_mapped_to(
-                supplemental_id=supplemental_id,
-                entry_combination_id=entry_combination_id
-            )
+        if self.num_pass > 1:
+            for doc_heading_mapped_to in doc.get("HeadingMappedToList"):
+                # Upsert the `EntryCombination` record.
+                entry_combination_id = self.dal.iodu_entry_combination(
+                    descriptor_id=self.dal.get_by_attrs(
+                        Descriptor,
+                        {"ui": self._get_dref_ui(doc_heading_mapped_to)}
+                    ),
+                    qualifier_id=self.dal.get_by_attrs(
+                        Qualifier,
+                        {"ui": self._get_qref_ui(doc_heading_mapped_to)}
+                    ),
+                    combination_type=None,
+                )
+                # Upsert the `SupplementalHeadingMappedTo` record.
+                self.dal.iodi_supplemental_heading_mapped_to(
+                    supplemental_id=supplemental_id,
+                    entry_combination_id=entry_combination_id
+                )
 
         # Upsert the `EntryCombination` records representing the
         # `<IndexingInformation>` elements and the
         # `SupplementalHeadingMappedTo` records.
-        for doc_indexing_informations in doc.get("IndexingInformationList"):
-            # Upsert the `EntryCombination` record.
-            entry_combination_id = self.dal.iodu_entry_combination(
-                descriptor_id=self.dal.get_by_attrs(
-                    Descriptor,
-                    {
-                        "ui": doc_indexing_informations.get(
-                            "DescriptorReferredTo",
-                        ).get("DescriptorUI"),
-                    }
-                ),
-                qualifier_id=self.dal.get_by_attrs(
-                    Qualifier,
-                    {
-                        "ui": doc_indexing_informations.get(
-                            "QualifierReferredTo",
-                        ).get("QualifierUI"),
-                    }
-                ),
-                combination_type=None,
-            )
-            # Upsert the `SupplementalIndexingInformation` record.
-            self.dal.iodi_supplemental_indexing_information(
-                supplemental_id=supplemental_id,
-                entry_combination_id=entry_combination_id,
-            )
+        if self.num_pass > 1:
+            for doc_indexing_informations in doc.get("IndexingInformationList"):
+                # Upsert the `EntryCombination` record.
+                entry_combination_id = self.dal.iodu_entry_combination(
+                    descriptor_id=self.dal.get_by_attrs(
+                        Descriptor,
+                        {"ui": self._get_dref_ui(doc_indexing_informations)}
+                    ),
+                    qualifier_id=self.dal.get_by_attrs(
+                        Qualifier,
+                        {"ui": self._get_qref_ui(doc_indexing_informations)}
+                    ),
+                    combination_type=None,
+                )
+                # Upsert the `SupplementalIndexingInformation` record.
+                self.dal.iodi_supplemental_indexing_information(
+                    supplemental_id=supplemental_id,
+                    entry_combination_id=entry_combination_id,
+                )
 
         # Upsert the `SupplementalPharmacologicalActionDescriptor` records.
-        for doc_pharmacological_action in doc.get("PharmacologicalActionList"):
-            self.dal.iodi_supplemental_pharmacological_action_descriptor(
-                supplemental_id=supplemental_id,
-                pharmacological_action_descriptor_id=self.dal.get_by_attrs(
-                    Descriptor,
-                    {
-                        "ui": doc_pharmacological_action.get(
-                            "DescriptorReferredTo",
-                        ).get("DescriptorUI"),
-                    }
-                ),
-            )
+        if self.num_pass > 1:
+            for doc_pharmacological_action in doc.get("PharmacologicalActionList"):
+                self.dal.iodi_supplemental_pharmacological_action_descriptor(
+                    supplemental_id=supplemental_id,
+                    pharmacological_action_descriptor_id=self.dal.get_by_attrs(
+                        Descriptor,
+                        {"ui": self._get_dref_ui(doc_pharmacological_action)},
+                    ),
+                )
 
         # Upsert the `Source` and `SupplementalSource` records.
         for doc_source in doc.get("SourceList"):
@@ -469,19 +492,16 @@ class IngesterDocumentDescriptor(IngesterDocumentBase):
         )
 
         # Upsert the `DescriptorAllowableQualifier` records.
-        for doc_allowable_qualifier in doc.get("AllowableQualifiersList"):
-            self.dal.iodu_descriptor_allowable_qualifier(
-                descriptor_id=descriptor_id,
-                qualifier_id=self.dal.get_by_attrs(
-                    Qualifier,
-                    {
-                        "ui": doc_allowable_qualifier.get(
-                            "QualifierReferredTo",
-                        ).get("QualifierUI"),
-                    }
-                ),
-                abbreviation=doc_allowable_qualifier.get("Abbreviation"),
-            )
+        if self.num_pass > 1:
+            for doc_allowable_qualifier in doc.get("AllowableQualifiersList"):
+                self.dal.iodu_descriptor_allowable_qualifier(
+                    descriptor_id=descriptor_id,
+                    qualifier_id=self.dal.get_by_attrs(
+                        Qualifier,
+                        {"ui": self._get_qref_ui(doc_allowable_qualifier)},
+                    ),
+                    abbreviation=doc_allowable_qualifier.get("Abbreviation"),
+                )
 
         # Upsert the `PreviousIndexing` and `DescriptorPreviousIndexing`
         # records.
@@ -499,75 +519,70 @@ class IngesterDocumentDescriptor(IngesterDocumentBase):
             )
 
         # Upsert the `EntryCombination` records.
-        for doc_entry_combination in doc.get("EntryCombinationList"):
-            # Upsert the ECIN `EntryCombination` record.
-            self.dal.iodu_entry_combination(
-                descriptor_id=self.dal.get_by_attrs(
-                    Descriptor,
-                    {
-                        "ui": doc_entry_combination.get("ECIN").get(
-                            "DescriptorReferredTo",
-                        ).get("DescriptorUI"),
-                    }
-                ),
-                qualifier_id=self.dal.get_by_attrs(
-                    Qualifier,
-                    {
-                        "ui": doc_entry_combination.get("ECIN").get(
-                            "QualifierReferredTo",
-                        ).get("QualifierUI"),
-                    }
-                ),
-                combination_type=EntryCombinationType.ECIN,
-            )
-            # Upsert the ECOUT `EntryCombination` record.
-            self.dal.iodu_entry_combination(
-                descriptor_id=self.dal.get_by_attrs(
-                    Descriptor,
-                    {
-                        "ui": doc_entry_combination.get("ECOUT").get(
-                            "DescriptorReferredTo",
-                        ).get("DescriptorUI"),
-                    }
-                ),
-                qualifier_id=self.dal.get_by_attrs(
-                    Qualifier,
-                    {
-                        "ui": doc_entry_combination.get("ECOUT").get(
-                            "QualifierReferredTo",
-                        ).get("QualifierUI"),
-                    }
-                ),
-                combination_type=EntryCombinationType.ECOUT,
-            )
+        if self.num_pass > 1:
+            for doc_entry_combination in doc.get("EntryCombinationList"):
+                # Upsert the ECIN `EntryCombination` record.
+                self.dal.iodu_entry_combination(
+                    descriptor_id=self.dal.get_by_attrs(
+                        Descriptor,
+                        {
+                            "ui": self._get_dref_ui(
+                                doc_entry_combination.get("ECIN")
+                            ),
+                        },
+                    ),
+                    qualifier_id=self.dal.get_by_attrs(
+                        Qualifier,
+                        {
+                            "ui": self._get_qref_ui(
+                                doc_entry_combination.get("ECIN")
+                            ),
+                        }
+                    ),
+                    combination_type=EntryCombinationType.ECIN,
+                )
+                # Upsert the ECOUT `EntryCombination` record.
+                self.dal.iodu_entry_combination(
+                    descriptor_id=self.dal.get_by_attrs(
+                        Descriptor,
+                        {
+                            "ui": self._get_dref_ui(
+                                doc_entry_combination.get("ECOUT")
+                            ),
+                        }
+                    ),
+                    qualifier_id=self.dal.get_by_attrs(
+                        Qualifier,
+                        {
+                            "ui": self._get_qref_ui(
+                                doc_entry_combination.get("ECOUT")
+                            ),
+                        }
+                    ),
+                    combination_type=EntryCombinationType.ECOUT,
+                )
 
         # Upsert `DescriptorRelatedDescriptor` records.
-        for related_descriptors in doc.get("SeeRelatedList"):
-            self.dal.iodi_descriptor_related_descriptor(
-                descriptor_id=descriptor_id,
-                related_descriptor_id=self.dal.get_by_attrs(
-                    Descriptor,
-                    {
-                        "ui": related_descriptors.get(
-                            "DescriptorReferredTo",
-                        ).get("DescriptorUI"),
-                    },
+        if self.num_pass > 1:
+            for related_descriptor in doc.get("SeeRelatedList"):
+                self.dal.iodi_descriptor_related_descriptor(
+                    descriptor_id=descriptor_id,
+                    related_descriptor_id=self.dal.get_by_attrs(
+                        Descriptor,
+                        {"ui": self._get_dref_ui(related_descriptor)},
+                    )
                 )
-            )
 
         # Upsert the `DescriptorPharmacologicalActionDescriptor` records.
-        for doc_pharmacological_action in doc.get("PharmacologicalActionList"):
-            self.dal.iodi_descriptor_pharmacological_action_descriptor(
-                descriptor_id=descriptor_id,
-                pharmacological_action_descriptor_id=self.dal.get_by_attrs(
-                    Descriptor,
-                    {
-                        "ui": doc_pharmacological_action.get(
-                            "DescriptorReferredTo",
-                        ).get("DescriptorUI"),
-                    }
-                ),
-            )
+        if self.num_pass > 1:
+            for doc_pharmacological_action in doc.get("PharmacologicalActionList"):
+                self.dal.iodi_descriptor_pharmacological_action_descriptor(
+                    descriptor_id=descriptor_id,
+                    pharmacological_action_descriptor_id=self.dal.get_by_attrs(
+                        Descriptor,
+                        {"ui": self._get_dref_ui(doc_pharmacological_action)},
+                    ),
+                )
 
         # Upsert the `TreeNumber` and `DescriptorTreeNumber` records.
         doc_tree_numbers = doc.get("TreeNumberList", [])
