@@ -216,7 +216,7 @@ class DalMesh(DalBase):
 
         # Create and populate a `ThesaurusId` object so that we can retrieve the
         # MD5 hash.
-        obj = TreeNumber()
+        obj = ThesaurusId()
         obj.thesaurus_id = thesaurus_id
 
         statement = insert(
@@ -284,6 +284,7 @@ class DalMesh(DalBase):
                 "note": note,
             }
         ).on_conflict_do_update(
+            index_elements=["ui"],
             set_={
                 "name": name,
                 "created": created,
@@ -402,6 +403,7 @@ class DalMesh(DalBase):
                 "translators_scope_note": translators_scope_note,
             }
         ).on_conflict_do_update(
+            index_elements=["ui"],
             set_={
                 "name": name,
                 "casn1_name": casn1_name,
@@ -461,6 +463,7 @@ class DalMesh(DalBase):
                 "relation_name": relation_name,
             }
         ).on_conflict_do_update(
+            index_elements=["concept_id", "related_concept_id"],
             set_={
                 "relation_name": relation_name,
             }
@@ -524,6 +527,7 @@ class DalMesh(DalBase):
                 "is_record_preferred_term": is_record_preferred_term,
             }
         ).on_conflict_do_update(
+            index_elements=["concept_id", "term_id"],
             set_={
                 "is_concept_preferred_term": is_concept_preferred_term,
                 "is_permuted_term": is_permuted_term,
@@ -595,6 +599,7 @@ class DalMesh(DalBase):
                 "online_note": online_note,
             }
         ).on_conflict_do_update(
+            index_elements=["ui"],
             set_={
                 "name": name,
                 "created": created,
@@ -653,6 +658,7 @@ class DalMesh(DalBase):
                 "is_preferred": is_preferred,
             }
         ).on_conflict_do_update(
+            index_elements=["qualifier_id", "concept_id"],
             set_={
                 "is_preferred": is_preferred,
             }
@@ -798,6 +804,7 @@ class DalMesh(DalBase):
                 "type": combination_type,
             }
         ).on_conflict_do_update(
+            index_elements=["descriptor_id", "qualifier_id"],
             set_={
                 "type": combination_type,
             }
@@ -880,6 +887,7 @@ class DalMesh(DalBase):
                 "consider_also": consider_also,
             }
         ).on_conflict_do_update(
+            index_elements=["ui"],
             set_={
                 "class": descriptor_class,
                 "name": name,
@@ -988,6 +996,7 @@ class DalMesh(DalBase):
                 "is_preferred": is_preferred,
             }
         ).on_conflict_do_update(
+            index_elements=["descriptor_id", "concept_id"],
             set_={
                 "is_preferred": is_preferred,
             }
@@ -1088,6 +1097,7 @@ class DalMesh(DalBase):
                 "abbreviation": abbreviation,
             }
         ).on_conflict_do_update(
+            index_elements=["descriptor_id", "qualifier_id"],
             set_={
                 "abbreviation": abbreviation,
             }
@@ -1342,6 +1352,7 @@ class DalMesh(DalBase):
                 "frequency": frequency,
             }
         ).on_conflict_do_update(
+            index_elements=["ui"],
             set_={
                 "class": supplemental_class,
                 "name": name,
@@ -1496,6 +1507,7 @@ class DalMesh(DalBase):
                 "is_preferred": is_preferred,
             }
         ).on_conflict_do_update(
+            index_elements=["supplemental_id", "concept_id"],
             set_={
                 "is_preferred": is_preferred,
             }
