@@ -46,7 +46,7 @@ class TreeNumber(Base, OrmBase):
 
     # Relationship to a list of `Descriptor` records.
     descriptors = sqlalchemy.orm.relationship(
-        argument="Descriptors",
+        argument="Descriptor",
         secondary="mesh.descriptor_tree_numbers",
         back_populates="tree_numbers",
     )
@@ -332,13 +332,6 @@ class Concept(Base, OrmBase):
 
     # TODO: RelatedRegistryNumberList (nullable)
 
-    # Relationship to a list of `Concept` records referenced in concept-relation
-    # elements.
-    related_concepts = sqlalchemy.orm.relationship(
-        argument="Concept",
-        secondary="mesh.concept_related_concepts",
-    )
-
     # Relationship to a list of `Term` records.
     terms = sqlalchemy.orm.relationship(
         argument="Term",
@@ -356,7 +349,7 @@ class Concept(Base, OrmBase):
     # Relationship to a list of `Descriptor` records.
     descriptors = sqlalchemy.orm.relationship(
         argument="Descriptor",
-        secondary="mesh.qualifier_descriptors",
+        secondary="mesh.descriptor_concepts",
         back_populates="concepts",
     )
 
@@ -695,7 +688,7 @@ class PreviousIndexing(Base, OrmBase):
 
     # Relationship to a list of `Descriptors` records.
     descriptors = sqlalchemy.orm.relationship(
-        argument="Descriptors",
+        argument="Descriptor",
         secondary="mesh.descriptor_previous_indexings",
         back_populates="previous_indexings",
     )
@@ -852,7 +845,7 @@ class Descriptor(Base, OrmBase):
     )
 
     # Relationship to a list of `Qualifier` records.
-    allowable_qualifiers = sqlalchemy.orm.relationship(
+    qualifiers = sqlalchemy.orm.relationship(
         argument="Qualifier",
         secondary="mesh.descriptor_allowable_qualifiers",
         back_populates="descriptors",
@@ -907,25 +900,11 @@ class Descriptor(Base, OrmBase):
         back_populates="descriptors",
     )
 
-    # Relationship to a list of `Descriptor` records referenced in
-    # see-related elements.
-    related_descriptors = sqlalchemy.orm.relationship(
-        argument="Descriptor",
-        secondary="mesh.descriptor_related_descriptors",
-    )
-
     # Referring to the `<ConsiderAlso>` element.
     consider_also = sqlalchemy.Column(
         name="consider_also",
         type_=sqlalchemy.types.Unicode(),
         nullable=True,
-    )
-
-    # Relationship to a list of `Descriptor` records referenced in
-    # pharmacological-actions.
-    pharmacological_action_descriptors = sqlalchemy.orm.relationship(
-        argument="Descriptor",
-        secondary="mesh.descriptor_pharmacological_action_descriptors",
     )
 
     # Relationship to a list of `TreeNumber` records.
@@ -1379,13 +1358,6 @@ class Supplemental(Base, OrmBase):
     indexing_informations = sqlalchemy.orm.relationship(
         argument="EntryCombination",
         secondary="mesh.supplemental_indexing_informations",
-    )
-
-    # Relationship to a list of `Descriptor` records referenced in
-    # pharmacological-actions.
-    pharmacological_action_descriptors = sqlalchemy.orm.relationship(
-        argument="Descriptor",
-        secondary="mesh.supplemental_pharmacological_action_descriptors",
     )
 
     # Relationship to a list of `Source` records.
