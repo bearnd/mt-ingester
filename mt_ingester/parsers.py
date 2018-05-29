@@ -7,12 +7,13 @@ from typing import Union
 
 from lxml import etree
 
+from fform.orm_mt import DescriptorClassType
+from fform.orm_mt import RelationNameType
+from fform.orm_mt import LexicalTagType
+from fform.orm_mt import SupplementalClassType
+
 from mt_ingester.loggers import create_logger
 from mt_ingester.parser_utils import convert_yn_boolean
-from mt_ingester.orm_enums import DescriptorClassType
-from mt_ingester.orm_enums import RelationNameType
-from mt_ingester.orm_enums import LexicalTagType
-from mt_ingester.orm_enums import SupplementalClassType
 
 
 class ParserXmlBase(object):

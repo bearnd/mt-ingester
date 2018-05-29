@@ -6,10 +6,11 @@
 import os
 import argparse
 
+from fform.dals_mt import DalMesh
+
 from mt_ingester.parsers import ParserXmlMeshDescriptors
 from mt_ingester.parsers import ParserXmlMeshQualifiers
 from mt_ingester.parsers import ParserXmlMeshSupplementals
-from mt_ingester.dals import DalMesh
 from mt_ingester.ingesters import IngesterDocumentDescriptor
 from mt_ingester.ingesters import IngesterDocumentQualifier
 from mt_ingester.ingesters import IngesterDocumentSupplemental

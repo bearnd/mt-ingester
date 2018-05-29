@@ -3,12 +3,13 @@
 import abc
 from typing import Union
 
-from mt_ingester.orm import Concept
-from mt_ingester.orm import Descriptor
-from mt_ingester.orm import Qualifier
-from mt_ingester.orm_enums import EntryCombinationType
+from fform.orm_mt import Concept
+from fform.orm_mt import Descriptor
+from fform.orm_mt import Qualifier
+from fform.orm_mt import EntryCombinationType
+from fform.dals_mt import DalMesh
+
 from mt_ingester.loggers import create_logger
-from mt_ingester.dals import DalMesh
 from mt_ingester.utils import log_ingestion_of_document
 
 
