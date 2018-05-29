@@ -13,8 +13,8 @@ dir_parent = os.path.abspath(os.path.join(dir_current, os.pardir))
 sys.path.append(dir_parent)
 
 from mt_ingester.config import import_config
-from mt_ingester.dal_base import DalBase
-from mt_ingester.orm_base import Base
+from fform.dal_base import DalBase
+from fform.orm_base import Base
 
 cfg = import_config(
     fname_config_file="/etc/mt-ingester/mt-ingester.json"
