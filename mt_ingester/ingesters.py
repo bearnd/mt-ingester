@@ -16,12 +16,12 @@ class IngesterDocumentBase(object):
     def __init__(
         self,
         dal,
-        num_pass: int,
+        do_ingest_links: bool,
         **kwargs
     ):
 
         # Internalize arguments.
-        self.num_pass = num_pass
+        self.do_ingest_links = do_ingest_links
         self.dal = dal
 
         self.logger = create_logger(
@@ -171,17 +171,17 @@ class IngesterDocumentBase(object):
         )
 
         # Upsert `ConceptRelatedConcept` records.
-        if self.num_pass > 1:
+        if self.do_ingest_links:
             for doc_concept_relations in doc.get("ConceptRelationList"):
                 self.dal.iodu_concept_related_concept(
                     concept_id=self.dal.get_by_attrs(
                         Concept,
                         {"ui": doc_concept_relations.get("Concept1UI")}
-                    ),
+                    ).concept_id,
                     related_concept_id=self.dal.get_by_attrs(
                         Concept,
                         {"ui": doc_concept_relations.get("Concept2UI")}
-                    ),
+                    ).concept_id,
                     relation_name=doc_concept_relations.get("RelationName"),
                 )
 
@@ -218,7 +218,7 @@ class IngesterDocumentQualifier(IngesterDocumentBase):
     def __init__(
         self,
         dal: DalMesh,
-        num_pass: int,
+        do_ingest_links: bool,
         **kwargs
     ):
         """Constructor and initialization.
@@ -230,7 +230,7 @@ class IngesterDocumentQualifier(IngesterDocumentBase):
 
         super(IngesterDocumentQualifier, self).__init__(
             dal=dal,
-            num_pass=num_pass,
+            do_ingest_links=do_ingest_links,
             kwargs=kwargs,
         )
 
@@ -294,7 +294,7 @@ class IngesterDocumentSupplemental(IngesterDocumentBase):
     def __init__(
         self,
         dal: DalMesh,
-        num_pass: int,
+        do_ingest_links: bool,
         **kwargs
     ):
         """Constructor and initialization.
@@ -306,7 +306,7 @@ class IngesterDocumentSupplemental(IngesterDocumentBase):
 
         super(IngesterDocumentSupplemental, self).__init__(
             dal=dal,
-            num_pass=num_pass,
+            do_ingest_links=do_ingest_links,
             kwargs=kwargs,
         )
 
@@ -358,18 +358,19 @@ class IngesterDocumentSupplemental(IngesterDocumentBase):
         # Upsert the `EntryCombination` records representing the
         # `<HeadingMappedTo>` elements and the `SupplementalHeadingMappedTo`
         # records.
-        if self.num_pass > 1:
+        if self.do_ingest_links:
             for doc_heading_mapped_to in doc.get("HeadingMappedToList"):
                 # Upsert the `EntryCombination` record.
+                qualifier = self.dal.get_by_attrs(
+                    Qualifier,
+                    {"ui": self._get_qref_ui(doc_heading_mapped_to)}
+                )
                 entry_combination_id = self.dal.iodu_entry_combination(
                     descriptor_id=self.dal.get_by_attrs(
                         Descriptor,
                         {"ui": self._get_dref_ui(doc_heading_mapped_to)}
-                    ),
-                    qualifier_id=self.dal.get_by_attrs(
-                        Qualifier,
-                        {"ui": self._get_qref_ui(doc_heading_mapped_to)}
-                    ),
+                    ).descriptor_id,
+                    qualifier_id=qualifier.qualifier_id if qualifier else None,
                     combination_type=None,
                 )
                 # Upsert the `SupplementalHeadingMappedTo` record.
@@ -381,18 +382,19 @@ class IngesterDocumentSupplemental(IngesterDocumentBase):
         # Upsert the `EntryCombination` records representing the
         # `<IndexingInformation>` elements and the
         # `SupplementalHeadingMappedTo` records.
-        if self.num_pass > 1:
+        if self.do_ingest_links:
             for doc_indexing_informations in doc.get("IndexingInformationList"):
                 # Upsert the `EntryCombination` record.
+                qualifier = self.dal.get_by_attrs(
+                    Qualifier,
+                    {"ui": self._get_qref_ui(doc_indexing_informations)}
+                )
                 entry_combination_id = self.dal.iodu_entry_combination(
                     descriptor_id=self.dal.get_by_attrs(
                         Descriptor,
                         {"ui": self._get_dref_ui(doc_indexing_informations)}
-                    ),
-                    qualifier_id=self.dal.get_by_attrs(
-                        Qualifier,
-                        {"ui": self._get_qref_ui(doc_indexing_informations)}
-                    ),
+                    ).descriptor_id,
+                    qualifier_id=qualifier.qualifier_id if qualifier else None,
                     combination_type=None,
                 )
                 # Upsert the `SupplementalIndexingInformation` record.
@@ -402,14 +404,15 @@ class IngesterDocumentSupplemental(IngesterDocumentBase):
                 )
 
         # Upsert the `SupplementalPharmacologicalActionDescriptor` records.
-        if self.num_pass > 1:
-            for doc_pharmacological_action in doc.get("PharmacologicalActionList"):
+        if self.do_ingest_links:
+            for doc_pharmacological_action in doc.get(
+                "PharmacologicalActionList"):
                 self.dal.iodi_supplemental_pharmacological_action_descriptor(
                     supplemental_id=supplemental_id,
                     pharmacological_action_descriptor_id=self.dal.get_by_attrs(
                         Descriptor,
                         {"ui": self._get_dref_ui(doc_pharmacological_action)},
-                    ),
+                    ).descriptor_id,
                 )
 
         # Upsert the `Source` and `SupplementalSource` records.
@@ -440,7 +443,7 @@ class IngesterDocumentDescriptor(IngesterDocumentBase):
     def __init__(
         self,
         dal: DalMesh,
-        num_pass: int,
+        do_ingest_links: bool,
         **kwargs
     ):
         """Constructor and initialization.
@@ -452,7 +455,7 @@ class IngesterDocumentDescriptor(IngesterDocumentBase):
 
         super(IngesterDocumentDescriptor, self).__init__(
             dal=dal,
-            num_pass=num_pass,
+            do_ingest_links=do_ingest_links,
             kwargs=kwargs,
         )
 
@@ -492,14 +495,14 @@ class IngesterDocumentDescriptor(IngesterDocumentBase):
         )
 
         # Upsert the `DescriptorAllowableQualifier` records.
-        if self.num_pass > 1:
+        if self.do_ingest_links:
             for doc_allowable_qualifier in doc.get("AllowableQualifiersList"):
                 self.dal.iodu_descriptor_allowable_qualifier(
                     descriptor_id=descriptor_id,
                     qualifier_id=self.dal.get_by_attrs(
                         Qualifier,
                         {"ui": self._get_qref_ui(doc_allowable_qualifier)},
-                    ),
+                    ).qualifier_id,
                     abbreviation=doc_allowable_qualifier.get("Abbreviation"),
                 )
 
@@ -519,8 +522,17 @@ class IngesterDocumentDescriptor(IngesterDocumentBase):
             )
 
         # Upsert the `EntryCombination` records.
-        if self.num_pass > 1:
+        if self.do_ingest_links:
             for doc_entry_combination in doc.get("EntryCombinationList"):
+                # Retrieve referenced `Qualifier` record.
+                qualifier = self.dal.get_by_attrs(
+                    Qualifier,
+                    {
+                        "ui": self._get_qref_ui(
+                            doc_entry_combination.get("ECIN")
+                        ),
+                    }
+                )
                 # Upsert the ECIN `EntryCombination` record.
                 self.dal.iodu_entry_combination(
                     descriptor_id=self.dal.get_by_attrs(
@@ -530,16 +542,18 @@ class IngesterDocumentDescriptor(IngesterDocumentBase):
                                 doc_entry_combination.get("ECIN")
                             ),
                         },
-                    ),
-                    qualifier_id=self.dal.get_by_attrs(
-                        Qualifier,
-                        {
-                            "ui": self._get_qref_ui(
-                                doc_entry_combination.get("ECIN")
-                            ),
-                        }
-                    ),
+                    ).descriptor_id,
+                    qualifier_id=qualifier.qualifier_id if qualifier else None,
                     combination_type=EntryCombinationType.ECIN,
+                )
+                # Retrieve referenced `Qualifier` record.
+                qualifier = self.dal.get_by_attrs(
+                    Qualifier,
+                    {
+                        "ui": self._get_qref_ui(
+                            doc_entry_combination.get("ECOUT")
+                        ),
+                    }
                 )
                 # Upsert the ECOUT `EntryCombination` record.
                 self.dal.iodu_entry_combination(
@@ -550,38 +564,32 @@ class IngesterDocumentDescriptor(IngesterDocumentBase):
                                 doc_entry_combination.get("ECOUT")
                             ),
                         }
-                    ),
-                    qualifier_id=self.dal.get_by_attrs(
-                        Qualifier,
-                        {
-                            "ui": self._get_qref_ui(
-                                doc_entry_combination.get("ECOUT")
-                            ),
-                        }
-                    ),
+                    ).descriptor_id,
+                    qualifier_id=qualifier.qualifier_id if qualifier else None,
                     combination_type=EntryCombinationType.ECOUT,
                 )
 
         # Upsert `DescriptorRelatedDescriptor` records.
-        if self.num_pass > 1:
+        if self.do_ingest_links:
             for related_descriptor in doc.get("SeeRelatedList"):
                 self.dal.iodi_descriptor_related_descriptor(
                     descriptor_id=descriptor_id,
                     related_descriptor_id=self.dal.get_by_attrs(
                         Descriptor,
                         {"ui": self._get_dref_ui(related_descriptor)},
-                    )
+                    ).descriptor_id,
                 )
 
         # Upsert the `DescriptorPharmacologicalActionDescriptor` records.
-        if self.num_pass > 1:
-            for doc_pharmacological_action in doc.get("PharmacologicalActionList"):
+        if self.do_ingest_links:
+            for doc_pharmacological_action in doc.get(
+                "PharmacologicalActionList"):
                 self.dal.iodi_descriptor_pharmacological_action_descriptor(
                     descriptor_id=descriptor_id,
                     pharmacological_action_descriptor_id=self.dal.get_by_attrs(
                         Descriptor,
                         {"ui": self._get_dref_ui(doc_pharmacological_action)},
-                    ),
+                    ).descriptor_id,
                 )
 
         # Upsert the `TreeNumber` and `DescriptorTreeNumber` records.
