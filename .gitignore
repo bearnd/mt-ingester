@@ -65,3 +65,4 @@ target/
 *.retry
 *.xml
 *.dtd
+/.ansible-vault-password
