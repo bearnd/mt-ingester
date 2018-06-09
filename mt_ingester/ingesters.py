@@ -648,7 +648,7 @@ class IngesterUmlsConso(object):
 
             # Calculate the MD5s of the synonyms.
             md5s = [
-                hashlib.md5(synonym.encode("utf-8"))
+                hashlib.md5(synonym.encode("utf-8")).digest()
                 for synonym in synonyms
             ]
 
