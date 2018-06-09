@@ -617,12 +617,12 @@ class IngesterDocumentDescriptor(IngesterDocumentBase):
             )
 
 
-class IgesterUmlsConso(object):
+class IngesterUmlsConso(object):
 
     def __init__(
         self,
         dal: DalMesh,
-        kwargs,
+        **kwargs
     ):
 
         # Internalize arguments.
