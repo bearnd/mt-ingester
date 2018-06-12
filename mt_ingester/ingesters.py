@@ -671,7 +671,7 @@ class IngesterUmlsConso(object):
                     attr_value=entity_ui,
                 )  # type: Supplemental
                 self.dal.biodi_supplemental_synonyms(
-                    concept_id=supplemental.supplemental_id,
+                    supplemental_id=supplemental.supplemental_id,
                     synonyms=synonyms,
                     md5s=md5s,
                 )
