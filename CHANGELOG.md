@@ -1,5 +1,9 @@
 ## Changelog
 
+### v0.2.3
+
+- `ingesters.py`: Fixed bug in the `ingest` method of the `IngesterUmlsConso` class.
+
 ### v0.2.2
 
 - `ingesters.py`: Fixed bug in the `ingest` method of the `IngesterUmlsConso` where I confused supplementals for concepts.
