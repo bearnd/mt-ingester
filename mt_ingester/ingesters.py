@@ -7,6 +7,7 @@ from typing import Union
 from fform.orm_mt import Concept
 from fform.orm_mt import Descriptor
 from fform.orm_mt import Qualifier
+from fform.orm_mt import Supplemental
 from fform.orm_mt import EntryCombinationType
 from fform.dals_mt import DalMesh
 
@@ -664,6 +665,17 @@ class IngesterUmlsConso(object):
                     md5s=md5s,
                 )
             elif entity_ui.startswith("C"):
+                supplemental = self.dal.get_by_attr(
+                    orm_class=Supplemental,
+                    attr_name="ui",
+                    attr_value=entity_ui,
+                )  # type: Supplemental
+                self.dal.biodi_supplemental_synonyms(
+                    concept_id=supplemental.supplemental_id,
+                    synonyms=synonyms,
+                    md5s=md5s,
+                )
+            elif entity_ui.startswith("M"):
                 concept = self.dal.get_by_attr(
                     orm_class=Concept,
                     attr_name="ui",
