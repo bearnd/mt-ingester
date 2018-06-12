@@ -11,9 +11,11 @@ from fform.dals_mt import DalMesh
 from mt_ingester.parsers import ParserXmlMeshDescriptors
 from mt_ingester.parsers import ParserXmlMeshQualifiers
 from mt_ingester.parsers import ParserXmlMeshSupplementals
+from mt_ingester.parsers import ParserUmlsConso
 from mt_ingester.ingesters import IngesterDocumentDescriptor
 from mt_ingester.ingesters import IngesterDocumentQualifier
 from mt_ingester.ingesters import IngesterDocumentSupplemental
+from mt_ingester.ingesters import IngesterUmlsConso
 from mt_ingester.config import import_config
 
 
@@ -61,11 +63,19 @@ def main(args):
             dal=dal,
             do_ingest_links=arguments.do_ingest_links,
         )
+    elif arguments.mode == "synonyms":
+        parser = ParserUmlsConso()
+        ingester = IngesterUmlsConso(dal=dal)
 
-    for filename in args.filenames:
-        docs = parser.parse(filename_xml=filename)
-        for doc in docs:
-            ingester.ingest(doc=doc)
+    if arguments.mode in ["descriptors", "qualifiers", "supplementals"]:
+        for filename in args.filenames:
+            docs = parser.parse(filename_xml=filename)
+            for doc in docs:
+                ingester.ingest(doc=doc)
+    elif arguments.mode == "synonyms":
+        for filename in args.filenames:
+            docs = parser.parse(filename)
+            ingester.ingest(docs)
 
 
 # main sentinel
@@ -83,7 +93,12 @@ if __name__ == "__main__":
         "--mode",
         dest="mode",
         help="Ingestion mode",
-        choices=["descriptors", "qualifiers", "supplementals"],
+        choices=[
+            "descriptors",
+            "qualifiers",
+            "supplementals",
+            "synonyms",
+        ],
         required=True,
     )
     argument_parser.add_argument(
