@@ -653,20 +653,35 @@ class IngesterUmlsConso(object):
             ]
 
             if entity_ui.startswith("D"):
+                descriptor = self.dal.get_by_attr(
+                    orm_class=Descriptor,
+                    attr_name="ui",
+                    attr_value=entity_ui,
+                )  # type: Descriptor
                 self.dal.biodi_descriptor_synonyms(
-                    descriptor_id=entity_ui,
+                    descriptor_id=descriptor.descriptor_id,
                     synonyms=synonyms,
                     md5s=md5s,
                 )
             elif entity_ui.startswith("C"):
+                concept = self.dal.get_by_attr(
+                    orm_class=Concept,
+                    attr_name="ui",
+                    attr_value=entity_ui,
+                )  # type: Concept
                 self.dal.biodi_concept_synonyms(
-                    concept_id=entity_ui,
+                    concept_id=concept.concept_id,
                     synonyms=synonyms,
                     md5s=md5s,
                 )
             elif entity_ui.startswith("Q"):
+                qualifier = self.dal.get_by_attr(
+                    orm_class=Qualifier,
+                    attr_name="ui",
+                    attr_value=entity_ui,
+                )  # type: Qualifier
                 self.dal.biodi_qualifier_synonyms(
-                    qualifier_id=entity_ui,
+                    qualifier_id=qualifier.qualifier_id,
                     synonyms=synonyms,
                     md5s=md5s,
                 )
