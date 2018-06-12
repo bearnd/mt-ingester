@@ -1,5 +1,9 @@
 ## Changelog
 
+### v0.2.4
+
+- `ingesters.py`: Fixed bug in the `ingest` method of the `IngesterUmlsConso` class and added fail-safes in case a MeSH entity defined in UMLS is not defined in the DB.
+
 ### v0.2.3
 
 - `ingesters.py`: Fixed bug in the `ingest` method of the `IngesterUmlsConso` class.

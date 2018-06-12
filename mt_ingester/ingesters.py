@@ -659,6 +659,8 @@ class IngesterUmlsConso(object):
                     attr_name="ui",
                     attr_value=entity_ui,
                 )  # type: Descriptor
+                if not descriptor:
+                    continue
                 self.dal.biodi_descriptor_synonyms(
                     descriptor_id=descriptor.descriptor_id,
                     synonyms=synonyms,
@@ -670,6 +672,8 @@ class IngesterUmlsConso(object):
                     attr_name="ui",
                     attr_value=entity_ui,
                 )  # type: Supplemental
+                if not supplemental:
+                    continue
                 self.dal.biodi_supplemental_synonyms(
                     supplemental_id=supplemental.supplemental_id,
                     synonyms=synonyms,
@@ -681,6 +685,8 @@ class IngesterUmlsConso(object):
                     attr_name="ui",
                     attr_value=entity_ui,
                 )  # type: Concept
+                if not concept:
+                    continue
                 self.dal.biodi_concept_synonyms(
                     concept_id=concept.concept_id,
                     synonyms=synonyms,
@@ -692,6 +698,8 @@ class IngesterUmlsConso(object):
                     attr_name="ui",
                     attr_value=entity_ui,
                 )  # type: Qualifier
+                if not qualifier:
+                    continue
                 self.dal.biodi_qualifier_synonyms(
                     qualifier_id=qualifier.qualifier_id,
                     synonyms=synonyms,
