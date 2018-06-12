@@ -13,3 +13,5 @@ python -m mt_ingester.mt_ingester --mode descriptors --do-ingest-links --config-
 python -m mt_ingester.mt_ingester --mode supplementals --no-do-ingest-links --config-file="/etc/mt-ingester/mt-ingester.json" supp2018.gz
 # Ingest supplementals with links.
 python -m mt_ingester.mt_ingester --mode supplementals --do-ingest-links --config-file="/etc/mt-ingester/mt-ingester.json" supp2018.gz
+
+python -m mt_ingester.mt_ingester --mode synonyms --config-file="/etc/mt-ingester/mt-ingester.json" MRCONSO.RRF
