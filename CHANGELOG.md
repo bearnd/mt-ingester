@@ -1,5 +1,9 @@
 ## Changelog
 
+### v0.2.1
+
+- `ingesters.py`: Fixed bug in the `ingest` method of the `IngesterUmlsConso` where I was using the entity UI to add synonym records instead of the entity PKs.
+
 ### v0.2.0
 
 Issue No. 28: Update `mt-ingester` to ingest UMLS synonyms:
