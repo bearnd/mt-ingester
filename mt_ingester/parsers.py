@@ -3,6 +3,8 @@
 import abc
 import gzip
 import datetime
+import csv
+import sys
 from typing import Union
 
 from lxml import etree
@@ -16,13 +18,24 @@ from mt_ingester.loggers import create_logger
 from mt_ingester.parser_utils import convert_yn_boolean
 
 
-class ParserXmlBase(object):
+# Set the maximum CSV field size to the system maximum as UMLS files may have
+# large fields.
+csv.field_size_limit(sys.maxsize)
+
+
+class ParserBase(object):
     def __init__(self, **kwargs):
 
         self.logger = create_logger(
             logger_name=type(self).__name__,
             logger_level=kwargs.get("logger_level", "DEBUG")
         )
+
+
+class ParserXmlBase(ParserBase):
+    def __init__(self, **kwargs):
+
+        super(ParserXmlBase, self).__init__(kwargs=kwargs)
 
     @staticmethod
     def _et(
@@ -1265,3 +1278,134 @@ class ParserXmlMeshSupplementals(ParserXmlMeshBase):
                 continue
 
             yield supplemental_record
+
+
+class ParserUmlsConso(ParserBase):
+    """Class used to parse the UMLS MRCONSO.rrf file and collect a unique list
+    of synonyms for the different MeSH entities defined in the file.
+
+    Attributes:
+        fieldnames_mrconso (list[str]): The fieldnames of the MRCONSO.rrf CSV
+            file. These are used when reading in the file.
+    """
+
+    # Define the header field names of the MRCONSO.rrf file as defined in
+    # https://www.ncbi.nlm.nih.gov/books/NBK9685/table/ch03.T
+    # .concept_names_and_sources_file_mr/?report=objectonly
+    fieldnames_mrconso = [
+        "CUI",
+        "LAT",
+        "TS",
+        "LUI",
+        "STT",
+        "SUI",
+        "ISPREF",
+        "AUI",
+        "SAUI",
+        "SCUI",
+        "SDUI",
+        "SAB",
+        "TTY",
+        "CODE",
+        "STR",
+        "SRL",
+        "SUPPRESS",
+        "CVF",
+    ]
+
+    def __init__(
+        self,
+        **kwargs: dict
+    ):
+        """Constructor and initialization."""
+        super(ParserUmlsConso, self).__init__(kwargs=kwargs)
+
+    def parse(
+        self,
+        filename_rrf
+    ):
+
+        msg = "Parsing UMLS MRCONSO RRF file '{0}'"
+        msg_fmt = msg.format(filename_rrf)
+        self.logger.info(msg=msg_fmt)
+
+        msg = "First pass through UMLS MRCONSO RRF file '{0}'"
+        msg_fmt = msg.format(filename_rrf)
+        self.logger.debug(msg=msg_fmt)
+
+        # First pass through the file. Iterate over all the lines and find MSH
+        # entries referring to a MeSH entity and append those lines to a
+        # list.
+        msh_rows = []
+        with open(filename_rrf, "r") as finp:
+            reader = csv.DictReader(
+                finp,
+                fieldnames=self.fieldnames_mrconso,
+                delimiter="|",
+            )
+
+            for entry in reader:
+                # Skip entries that do not refer to MeSH.
+                if not entry.get("SAB") == "MSH":
+                    continue
+
+                # Skip that do not refer to a MeSH entity.
+                if not entry.get("SDUI"):
+                    continue
+
+                # Skip non-Engish entries.
+                if entry.get("LAT") != "ENG":
+                    continue
+
+                row = {
+                    "cui": entry["CUI"],
+                    "entity_ui": entry["SDUI"],
+                    "synonym": entry["STR"],
+                }
+                msh_rows.append(row)
+
+        msg = "Second pass through UMLS MRCONSO RRF file '{0}'"
+        msg_fmt = msg.format(filename_rrf)
+        self.logger.debug(msg=msg_fmt)
+
+        # Second pass through the file. Iterate over all the lines and find all
+        # synonyms relating to a given CUI that was previously associated with
+        # a MeSH entity.
+        cui_synonyms = {msh_row["cui"]: [] for msh_row in msh_rows}
+        with open(filename_rrf, "r") as finp:
+            reader = csv.DictReader(
+                finp,
+                fieldnames=self.fieldnames_mrconso,
+                delimiter="|",
+            )
+
+            for entry in reader:
+                # Skip non-Engish entries.
+                if entry.get("LAT") != "ENG":
+                    continue
+
+                if entry["CUI"] not in cui_synonyms.keys():
+                    continue
+
+                cui_synonyms[entry["CUI"]].append(entry["STR"])
+
+        # Iterate over the initially collected rows and create a
+        # entity_ui:synonyms dictionary with all synonyms for a given MeSH
+        # entity based on the associated CUIs that were collected prior.
+        entity_synonyms = {
+            msh_row["entity_ui"]: []
+            for msh_row in msh_rows
+        }
+        for msh_row in msh_rows:
+            entity_synonyms[msh_row["entity_ui"]].append(
+                msh_row["synonym"]
+            )
+            entity_synonyms[msh_row["entity_ui"]].extend(
+                cui_synonyms[msh_row["cui"]]
+            )
+
+        # Deduplicate the synonyms.
+        for entity_ui, synonyms in entity_synonyms.items():
+            entity_synonyms[entity_ui] = list(set(synonyms))
+
+        return entity_synonyms

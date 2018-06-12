@@ -1,6 +1,7 @@
 # coding=utf-8
 
 import abc
+import hashlib
 from typing import Union
 
 from fform.orm_mt import Concept
@@ -614,3 +615,60 @@ class IngesterDocumentDescriptor(IngesterDocumentBase):
                 concept_id=concept_id,
                 is_preferred=doc_concept.get("PreferredConceptYN"),
             )
+
+
+class IngesterUmlsConso(object):
+
+    def __init__(
+        self,
+        dal: DalMesh,
+        **kwargs
+    ):
+
+        # Internalize arguments.
+        self.dal = dal
+
+        self.logger = create_logger(
+            logger_name=type(self).__name__,
+            logger_level=kwargs.get("logger_level", "DEBUG")
+        )
+
+    def ingest(
+        self,
+        document: dict
+    ):
+
+        msg = "Ingesting synonyms for {} MeSH entities."
+        msg_fmt = msg.format(len(document.keys()))
+        self.logger.info(msg_fmt)
+
+        # Iterate over the synonyms and ingest them according to the type of
+        # MeSH entity they're referring to.
+        for entity_ui, synonyms in document.items():
+
+            # Calculate the MD5s of the synonyms.
+            md5s = [
+                hashlib.md5(synonym.encode("utf-8")).digest()
+                for synonym in synonyms
+            ]
+
+            if entity_ui.startswith("D"):
+                self.dal.biodi_descriptor_synonyms(
+                    descriptor_id=entity_ui,
+                    synonyms=synonyms,
+                    md5s=md5s,
+                )
+            elif entity_ui.startswith("C"):
+                self.dal.biodi_concept_synonyms(
+                    concept_id=entity_ui,
+                    synonyms=synonyms,
+                    md5s=md5s,
+                )
+            elif entity_ui.startswith("Q"):
+                self.dal.biodi_qualifier_synonyms(
+                    qualifier_id=entity_ui,
+                    synonyms=synonyms,
+                    md5s=md5s,
+                )
+            else:
+                raise NotImplementedError
