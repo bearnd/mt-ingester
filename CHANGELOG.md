@@ -1,5 +1,16 @@
 ## Changelog
 
+### v0.2.5
+
+Issue No. 34: Cleanup the MeSH entity synonyms:
+
+- `parsers.py`: Updated the `parse` method of the `ParserUmlsConso` class to lowercase all collected synonyms in order to reduce duplication among them for a given MeSH entity.
+- `ingesters.py`: Updated the `ingest` method of the `IngesterUmlsConso` class and added more logging verbosity.
+
+Issue No. 33: Remove the `concept_synonyms` table:
+
+- `ingesters.py`: Updated the `ingest` method of the `IngesterUmlsConso` class and removed the ingestion of concept synonyms.
+
 ### v0.2.4
 
 - `ingesters.py`: Fixed bug in the `ingest` method of the `IngesterUmlsConso` class and added fail-safes in case a MeSH entity defined in UMLS is not defined in the DB.

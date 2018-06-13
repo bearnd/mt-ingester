@@ -1404,6 +1404,12 @@ class ParserUmlsConso(ParserBase):
                 cui_synonyms[msh_row["cui"]]
             )
 
+        # Lowercase all synonyms
+        for entity_ui, synonyms in entity_synonyms.items():
+            entity_synonyms[entity_ui] = [
+                synonym.lower() for synonym in synonyms
+            ]
+
         # Deduplicate the synonyms.
         for entity_ui, synonyms in entity_synonyms.items():
             entity_synonyms[entity_ui] = list(set(synonyms))
