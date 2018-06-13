@@ -24,7 +24,7 @@ test_requirements = [
 
 setup(
     name='mt_ingester',
-    version='0.2.4',
+    version='0.2.5',
     description="MeshTerms XML dump parser and SQL ingester..",
     long_description=readme + '\n\n' + history,
     author="Adamos Kyriakou",
