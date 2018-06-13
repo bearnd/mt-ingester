@@ -693,19 +693,6 @@ class IngesterUmlsConso(object):
                     synonyms=synonyms,
                     md5s=md5s,
                 )
-            elif entity_ui.startswith("M"):
-                concept = self.dal.get_by_attr(
-                    orm_class=Concept,
-                    attr_name="ui",
-                    attr_value=entity_ui,
-                )  # type: Concept
-                if not concept:
-                    continue
-                self.dal.biodi_concept_synonyms(
-                    concept_id=concept.concept_id,
-                    synonyms=synonyms,
-                    md5s=md5s,
-                )
             elif entity_ui.startswith("Q"):
                 qualifier = self.dal.get_by_attr(
                     orm_class=Qualifier,
