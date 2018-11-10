@@ -16,51 +16,76 @@ sql_password: !vault |
 # PostgreSQL Server Settings.
 postgresql_python_library: "python-psycopg2"
 
-# PostgreSQL Server Databases.
+# PostgreSQL Databases.
 postgresql_databases:
   - name: "fightfor"
     port: 5432
   - name: "test"
     port: 5432
-# PostgreSQL Server Users.
+
+# PostgreSQL Users.
 postgresql_users:
-  - name: "mt_ingester"
+  - name: "{{ system.user }}"
     password: "{{ sql_password }}"
     port: 5432
 
-app_mt_ingester:
+# PostgreSQL schemata.
+postgresql_schemata:
+  - clinicaltrials
 
-  # Application user settings.
-  user: mt_ingester
-  group: mt_ingester
+# PostgreSQL extensions.
+postgresql_extensions:
+  - pg_trgm
+  - postgis
 
+project:
+  name: "mt-ingester"
+
+system:
+  # User name.
+  user: "mt_ingester"
+  # User group.
+  group: "mt_ingester"
   # Application directories.
-  config_dir: /etc/mt-ingester
-  share_dir: /usr/local/share/mt-ingester
-  run_dir: /var/run/mt-ingester
-  log_dir: /var/log/mt-ingester
-  virtual_env_dir: /usr/local/share/mt-ingester/venvs/mt-ingester
+  directories:
+    config: "/etc/{{ project.name }}"
+    share: "/usr/local/share/{{ project.name }}"
+    run: "/var/run/{{ project.name }}"
+    log: "/var/log/{{ project.name }}"
+    virtual_env: "/usr/local/share/{{ project.name }}/venvs/{{ project.name }}"
 
-  # Application Configuration Settings.
-  config:
 
-    dev:
-      # General Settings.
-      logger_level: DEBUG
+# Application Configuration Settings.
+config:
+  test:
+    # General Settings.
+    logger_level: DEBUG
 
-      # PostgreSQL Server Configuration Settings.
-      sql_host: "localhost"
-      sql_port: 5432
-      sql_username: "mt_ingester"
-      sql_password: "{{ sql_password }}"
-      sql_db: "fightfor"
-    prod:
-      # General Settings.
-      logger_level: INFO
+    # PostgreSQL Server Configuration Settings.
+    sql_host: "localhost"
+    sql_port: 5432
+    sql_username: "{{ system.user }}"
+    sql_password: "{{ sql_password }}"
+    sql_db: "test"
 
-      # PostgreSQL Server Configuration Settings.
-      sql_host: "localhost"
-      sql_port: 5432
-      sql_username: "mt_ingester"
-      sql_password: "{{ sql_password }}"
-      sql_db: "fightfor"
+  dev:
+    # General Settings.
+    logger_level: DEBUG
+
+    # PostgreSQL Server Configuration Settings.
+    sql_host: "localhost"
+    sql_port: 5432
+    sql_username: "{{ system.user }}"
+    sql_password: "{{ sql_password }}"
+    sql_db: "fightfor"
+
+  prod:
+    # General Settings.
+    logger_level: INFO
+
+    # PostgreSQL Server Configuration Settings.
+    sql_host: "localhost"
+    sql_port: 5432
+    sql_username: "{{ system.user }}"
+    sql_password: "{{ sql_password }}"
+    sql_db: "fightfor"
