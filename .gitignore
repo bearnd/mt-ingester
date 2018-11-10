@@ -67,3 +67,5 @@ target/
 *.dtd
 /.ansible-vault-password
 *.RRF
+/.vagrant
+/.idea
