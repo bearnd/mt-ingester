@@ -9,6 +9,7 @@ from fform.orm_mt import Descriptor
 from fform.orm_mt import Qualifier
 from fform.orm_mt import Supplemental
 from fform.orm_mt import EntryCombinationType
+from fform.orm_mt import DescriptorDefinitionSourceType
 from fform.dals_mt import DalMesh
 
 from mt_ingester.loggers import create_logger
@@ -409,7 +410,8 @@ class IngesterDocumentSupplemental(IngesterDocumentBase):
         # Upsert the `SupplementalPharmacologicalActionDescriptor` records.
         if self.do_ingest_links:
             for doc_pharmacological_action in doc.get(
-                "PharmacologicalActionList"):
+                    "PharmacologicalActionList"
+            ):
                 self.dal.iodi_supplemental_pharmacological_action_descriptor(
                     supplemental_id=supplemental_id,
                     pharmacological_action_descriptor_id=self.dal.get_by_attrs(
@@ -716,3 +718,60 @@ class IngesterUmlsConso(object):
                 msg_fmt = msg.format(entity_ui)
                 self.logger.warning(msg_fmt)
                 continue
+
+
+class IngesterUmlsDef(object):
+
+    def __init__(
+        self,
+        dal: DalMesh,
+        **kwargs
+    ):
+
+        # Internalize arguments.
+        self.dal = dal
+
+        self.logger = create_logger(
+            logger_name=type(self).__name__,
+            logger_level=kwargs.get("logger_level", "DEBUG")
+        )
+
+    def ingest(
+        self,
+        document: dict
+    ):
+
+        msg = "Ingesting definitions for {} MeSH descriptors."
+        msg_fmt = msg.format(len(document.keys()))
+        self.logger.info(msg_fmt)
+
+        # Iterate over the definitions and ingest.
+        for descriptor_ui, data in document.items():
+            for source, definitions in data.items():
+                for definition in definitions:
+                    # Calculate the MD5 of the definition.
+                    md5 = hashlib.md5(definition.encode("utf-8")).digest()
+
+                    msg = "Ingesting synonyms for MeSH descriptor with UI '{}'"
+                    msg_fmt = msg.format(descriptor_ui)
+                    self.logger.info(msg_fmt)
+
+                    descriptor = self.dal.get_by_attr(
+                        orm_class=Descriptor,
+                        attr_name="ui",
+                        attr_value=descriptor_ui,
+                    )  # type: Descriptor
+
+                    if not descriptor:
+                        msg = "No `Descriptor` record found with UI '{}'."
+                        msg_fmt = msg.format(descriptor_ui)
+                        self.logger.warning(msg_fmt)
+                        continue
+
+                    self.dal.iodi_descriptor_definition(
+                        descriptor_id=descriptor.descriptor_id,
+                        source=DescriptorDefinitionSourceType.get_member(
+                            source,
+                        ),
+                        md5=md5,
+                    )

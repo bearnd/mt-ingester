@@ -1,5 +1,15 @@
 ## Changelog
 
+### v0.3.0
+
+Issue No. 189: Develop a UMLS parser and ingester for MeSH definitions:
+
+- Updated Ansible role to match the other services.
+- Added a new `ParserUmlsDef` class to parse the UMLS MRSAT.rrf and MRDEF.rrf files and extract definitions for the different MeSH descriptors.
+- Added a new `IngesterUmlsDef` class to ingest the definitions extracted from the `ParserUmlsDef` class.
+- Added a `scripts` subpackage.
+- Added a script to ingest the UMLS MRDEF.rrf definitions.
+
 ### v0.2.5
 
 Issue No. 34: Cleanup the MeSH entity synonyms:

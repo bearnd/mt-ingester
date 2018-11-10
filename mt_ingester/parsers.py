@@ -5,7 +5,7 @@ import gzip
 import datetime
 import csv
 import sys
-from typing import Union
+from typing import Union, Optional, List, Dict
 
 from lxml import etree
 
@@ -1281,12 +1281,8 @@ class ParserXmlMeshSupplementals(ParserXmlMeshBase):
 
 
 class ParserUmlsConso(ParserBase):
-    """Class used to parse the UMLS MRCONSO.rrf file and collect a unique list
-    of synonyms for the different MeSH entities defined in the file.
-
-    Attributes:
-        fieldnames_mrconso (list[str]): The fieldnames of the MRCONSO.rrf CSV
-            file. These are used when reading in the file.
+    """ Class used to parse the UMLS MRCONSO.rrf file and collect a unique list
+        of synonyms for the different MeSH entities defined in the file.
     """
 
     # Define the header field names of the MRCONSO.rrf file as defined in
@@ -1415,3 +1411,164 @@ class ParserUmlsConso(ParserBase):
             entity_synonyms[entity_ui] = list(set(synonyms))
 
         return entity_synonyms
+
+
+class ParserUmlsDef(ParserBase):
+    """ Class used to parse the UML MRDEF.rrf file and collect a dictionary of
+        definitions for the different MeSH entities.
+
+    Notes:
+        This parser also requires the MRSAR.rrf file in order to establlish a
+        relationship between the UMLS concept IDs and the MeSH UIDs.
+    """
+
+    # Define the header field names of the MRDEF.rrf file as defined in
+    # https://www.ncbi.nlm.nih.gov/books/NBK9685/table/ch03.T
+    # .definitions_file_mrdef_rrf/?report=objectonly
+    fieldnames_mrdef = [
+        "CUI",
+        "AUI",
+        "ATUI",
+        "SATUI",
+        "SAB",
+        "DEF",
+        "SUPPRESS",
+        "CVF",
+    ]
+
+    # Define the header field names of the MRSAT.rrf file as defined in
+    # https://www.ncbi.nlm.nih.gov/books/NBK9685/table/ch03.T
+    # .simple_concept_and_atom_attribute/?report=objectonly
+    fieldnames_mrsat = [
+        "CUI",
+        "LUI",
+        "SUI",
+        "METAUI",
+        "STYPE",
+        "CODE",
+        "ATUI",
+        "SATUI",
+        "ATN",
+        "SAB",
+        "ATV",
+        "SUPPRESS",
+        "CVF",
+    ]
+
+    def __init__(
+        self,
+        **kwargs: dict
+    ):
+        """ Constructor and initialization."""
+        super(ParserUmlsDef, self).__init__(kwargs=kwargs)
+
+    def parse(
+        self,
+        filename_mrdef_rrf: str,
+        filename_mrsat_rrf: str,
+        sources_include: Optional[List[str]] = None,
+        sources_exclude: Optional[List[str]] = None,
+    ) -> Dict[str, Dict[str, List[str]]]:
+        """ Parses the MRSAT.rrf and MRDEF.rrf files and creates a dictionary
+            keyed on MeSH UIDs with values of dictionaries of definitions which
+            are themselves keyed on the definition source name and valued with
+            a list of the definitions themselves.
+
+        Notes:
+            A MeSH descriptor may have multiple definitions defined under the
+            same source.
+
+        Args:
+            filename_mrdef_rrf (str): Path to the MRDEF.rrf file.
+            filename_mrsat_rrf (str): Path to the MRSAT.rrf file.
+            sources_include (Optional[List[str]] = None): A list of source names
+                to which the results will be limited to. Should *not* be used in
+                conjunction with the `sources_exclude` argument.
+            sources_exclude (Optional[List[str]] = None): A list of source names
+                to be excluded from the results. Should *not* be used in
+                conjunction with the `sources_include` argument.
+
+        Returns:
+            Dict[str, Dict[str, List[str]]]: Result dictionary keyed on MeSH
+            UIDs with values of dictionaries of definitions which are themselves
+            keyed on the definition source name and valued with a list of the
+            definitions themselves.
+        """
+
+        msg = "Parsing UMLS MRSAT RRF file '{0}'"
+        msg_fmt = msg.format(filename_mrsat_rrf)
+        self.logger.info(msg=msg_fmt)
+
+        # Iterate over the MRSAT.rrf lines and create a dictionary mapping UMLS
+        # concept IDs (CUIs) to MeSH descriptor IDs (DUIs).
+        map_cui_dui = {}
+        with open(filename_mrsat_rrf, "r") as finp:
+            reader = csv.DictReader(
+                finp,
+                fieldnames=self.fieldnames_mrsat,
+                delimiter="|",
+            )
+
+            for entry in reader:
+                # Skip entries that don't establish the relationship between
+                # a UMLS concept and a MeSH descriptor.
+                if not entry.get("ATN") == "MESH_DUI":
+                    continue
+
+                # Skip entries that don't define a value for CUI or ATV.
+                if not entry.get("CUI") or not entry.get("ATV"):
+                    continue
+
+                map_cui_dui[entry["CUI"]] = entry["ATV"]
+
+        msg = "Parsing UMLS MRDEF RRF file '{0}'"
+        msg_fmt = msg.format(filename_mrdef_rrf)
+        self.logger.info(msg=msg_fmt)
+
+        dui_definitions = {}
+        with open(filename_mrdef_rrf, "r") as finp:
+            reader = csv.DictReader(
+                finp,
+                fieldnames=self.fieldnames_mrdef,
+                delimiter="|",
+            )
+
+            for entry in reader:
+                # Skip entries whose CUIs don't refer to MeSH descriptors as
+                # defined in the `map_cui_dui` dictionary.
+                if entry.get("CUI") not in map_cui_dui.keys():
+                    continue
+
+                # Skip entries that don't define a definition source.
+                if not entry.get("SAB"):
+                    continue
+
+                # Skip entries that don't define a definition.
+                if not entry.get("DEF"):
+                    continue
+
+                # If `sources_include` is defined then skip entries with a
+                # source not present in `sources_include`.
+                if sources_include is not None:
+                    if entry["SAB"] not in sources_include:
+                        continue
+
+                # If `sources_exclude` is defined then skip entries with a
+                # source present in `sources_exclude`.
+                if sources_exclude is not None:
+                    if entry["SAB"] in sources_exclude:
+                        continue
+
+                # Retrieve the list of definitions for this MeSH descriptor and
+                # definition source.
+                definitions = dui_definitions.setdefault(
+                    map_cui_dui[entry["CUI"]],
+                    {},
+                ).setdefault(entry["SAB"], [])
+
+                # Add the new definition if it doesn't already exist in the
+                # list.
+                if entry["DEF"] not in definitions:
+                    definitions.append(entry["DEF"])
+
+        return dui_definitions
