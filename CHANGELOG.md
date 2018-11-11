@@ -1,5 +1,9 @@
 ## Changelog
 
+### v0.3.1
+
+- Bug fixes.
+
 ### v0.3.0
 
 Issue No. 189: Develop a UMLS parser and ingester for MeSH definitions:

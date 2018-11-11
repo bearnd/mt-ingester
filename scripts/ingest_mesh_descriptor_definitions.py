@@ -56,12 +56,17 @@ if __name__ == '__main__':
         help="MRSAT.rrf filename",
         required=True,
     )
-
     argument_parser.add_argument(
         "--mr-def-filename",
         dest="filename_mrdef_rrf",
         help="MRDEF.rrf filename",
         required=True,
+    )
+    argument_parser.add_argument(
+        "--config-file",
+        dest="config_file",
+        help="configuration file",
+        required=False,
     )
 
     arguments = argument_parser.parse_args()

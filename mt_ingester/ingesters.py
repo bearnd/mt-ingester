@@ -752,7 +752,8 @@ class IngesterUmlsDef(object):
                     # Calculate the MD5 of the definition.
                     md5 = hashlib.md5(definition.encode("utf-8")).digest()
 
-                    msg = "Ingesting synonyms for MeSH descriptor with UI '{}'"
+                    msg = ("Ingesting definition for MeSH descriptor with "
+                           "UI '{}'")
                     msg_fmt = msg.format(descriptor_ui)
                     self.logger.info(msg_fmt)
 
@@ -773,5 +774,6 @@ class IngesterUmlsDef(object):
                         source=DescriptorDefinitionSourceType.get_member(
                             source,
                         ),
+                        definition=definition,
                         md5=md5,
                     )
