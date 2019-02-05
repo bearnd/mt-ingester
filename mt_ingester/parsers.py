@@ -1280,6 +1280,81 @@ class ParserXmlMeshSupplementals(ParserXmlMeshBase):
             yield supplemental_record
 
 
+class ParserUmlsSat(ParserBase):
+    """ Class used to parse the UMLS MRSAT.rrf file and create a map between
+        UMLS CUIs and MeSH descriptor IDs.
+    """
+
+    # Define the header field names of the MRSAT.rrf file as defined in
+    # https://www.ncbi.nlm.nih.gov/books/NBK9685/table/ch03.T
+    # .simple_concept_and_atom_attribute/?report=objectonly
+    fieldnames_mrsat = [
+        "CUI",
+        "LUI",
+        "SUI",
+        "METAUI",
+        "STYPE",
+        "CODE",
+        "ATUI",
+        "SATUI",
+        "ATN",
+        "SAB",
+        "ATV",
+        "SUPPRESS",
+        "CVF",
+    ]
+
+    def __init__(
+        self,
+        **kwargs: dict
+    ):
+        """ Constructor and initialization."""
+        super(ParserUmlsSat, self).__init__(kwargs=kwargs)
+
+    def parse(
+        self,
+        filename_mrsat_rrf: str,
+    ) -> Dict[str, str]:
+        """ Parses the MRSAT.rrf file and creates a dictionary keyed on UMLS
+            CUIs with values of MeSH descriptor IDs.
+
+        Args:
+            filename_mrsat_rrf (str): Path to the MRSAT.rrf file.
+
+        Returns:
+            Dict[str, str]: Result dictionary keyed on UMLS CUIs with values of
+                MeSH descriptor IDs.
+        """
+
+        msg = "Parsing UMLS MRSAT RRF file '{0}'"
+        msg_fmt = msg.format(filename_mrsat_rrf)
+        self.logger.info(msg=msg_fmt)
+
+        # Iterate over the MRSAT.rrf lines and create a dictionary mapping UMLS
+        # concept IDs (CUIs) to MeSH descriptor IDs (DUIs).
+        map_cui_dui = {}
+        with open(filename_mrsat_rrf, "r") as finp:
+            reader = csv.DictReader(
+                finp,
+                fieldnames=self.fieldnames_mrsat,
+                delimiter="|",
+            )
+
+            for entry in reader:
+                # Skip entries that don't establish the relationship between
+                # a UMLS concept and a MeSH descriptor.
+                if not entry.get("ATN") == "MESH_DUI":
+                    continue
+
+                # Skip entries that don't define a value for CUI or ATV.
+                if not entry.get("CUI") or not entry.get("ATV"):
+                    continue
+
+                map_cui_dui[entry["CUI"]] = entry["ATV"]
+
+        return map_cui_dui
+
+
 class ParserUmlsConso(ParserBase):
     """ Class used to parse the UMLS MRCONSO.rrf file and collect a unique list
         of synonyms for the different MeSH entities defined in the file.
@@ -1418,7 +1493,7 @@ class ParserUmlsDef(ParserBase):
         definitions for the different MeSH entities.
 
     Notes:
-        This parser also requires the MRSAR.rrf file in order to establlish a
+        This parser also requires the MRSAT.rrf file in order to establlish a
         relationship between the UMLS concept IDs and the MeSH UIDs.
     """
 
@@ -1432,25 +1507,6 @@ class ParserUmlsDef(ParserBase):
         "SATUI",
         "SAB",
         "DEF",
-        "SUPPRESS",
-        "CVF",
-    ]
-
-    # Define the header field names of the MRSAT.rrf file as defined in
-    # https://www.ncbi.nlm.nih.gov/books/NBK9685/table/ch03.T
-    # .simple_concept_and_atom_attribute/?report=objectonly
-    fieldnames_mrsat = [
-        "CUI",
-        "LUI",
-        "SUI",
-        "METAUI",
-        "STYPE",
-        "CODE",
-        "ATUI",
-        "SATUI",
-        "ATN",
-        "SAB",
-        "ATV",
         "SUPPRESS",
         "CVF",
     ]
@@ -1470,9 +1526,9 @@ class ParserUmlsDef(ParserBase):
         sources_exclude: Optional[List[str]] = None,
     ) -> Dict[str, Dict[str, List[str]]]:
         """ Parses the MRSAT.rrf and MRDEF.rrf files and creates a dictionary
-            keyed on MeSH UIDs with values of dictionaries of definitions which
-            are themselves keyed on the definition source name and valued with
-            a list of the definitions themselves.
+            keyed on MeSH descriptor IDs with values of dictionaries of
+            definitions which are themselves keyed on the definition source name
+            and valued with a list of the definitions themselves.
 
         Notes:
             A MeSH descriptor may have multiple definitions defined under the
@@ -1490,36 +1546,15 @@ class ParserUmlsDef(ParserBase):
 
         Returns:
             Dict[str, Dict[str, List[str]]]: Result dictionary keyed on MeSH
-            UIDs with values of dictionaries of definitions which are themselves
-            keyed on the definition source name and valued with a list of the
-            definitions themselves.
+            descriptor IDs with values of dictionaries of definitions which are
+            themselves keyed on the definition source name and valued with a
+            list of the definitions themselves.
         """
 
-        msg = "Parsing UMLS MRSAT RRF file '{0}'"
-        msg_fmt = msg.format(filename_mrsat_rrf)
-        self.logger.info(msg=msg_fmt)
-
-        # Iterate over the MRSAT.rrf lines and create a dictionary mapping UMLS
-        # concept IDs (CUIs) to MeSH descriptor IDs (DUIs).
-        map_cui_dui = {}
-        with open(filename_mrsat_rrf, "r") as finp:
-            reader = csv.DictReader(
-                finp,
-                fieldnames=self.fieldnames_mrsat,
-                delimiter="|",
-            )
-
-            for entry in reader:
-                # Skip entries that don't establish the relationship between
-                # a UMLS concept and a MeSH descriptor.
-                if not entry.get("ATN") == "MESH_DUI":
-                    continue
-
-                # Skip entries that don't define a value for CUI or ATV.
-                if not entry.get("CUI") or not entry.get("ATV"):
-                    continue
-
-                map_cui_dui[entry["CUI"]] = entry["ATV"]
+        # Create a `ParserUmlsSat` parser and use it to parse the MRSAT.RRF file
+        # to create a map between CUIs and MeSH IDs.
+        parser_mrsat = ParserUmlsSat()
+        map_cui_dui = parser_mrsat.parse(filename_mrsat_rrf=filename_mrsat_rrf)
 
         msg = "Parsing UMLS MRDEF RRF file '{0}'"
         msg_fmt = msg.format(filename_mrdef_rrf)
