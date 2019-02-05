@@ -1357,7 +1357,11 @@ class ParserUmlsSat(ParserBase):
 
 class ParserUmlsConso(ParserBase):
     """ Class used to parse the UMLS MRCONSO.rrf file and collect a unique list
-        of synonyms for the different MeSH entities defined in the file.
+        of synonyms for the different MeSH descriptors defined in the file.
+
+    Notes:
+        This parser also requires the MRSAT.rrf file in order to establlish a
+        relationship between the UMLS concept IDs and the MeSH descriptor IDs.
     """
 
     # Define the header field names of the MRCONSO.rrf file as defined in
@@ -1393,22 +1397,32 @@ class ParserUmlsConso(ParserBase):
 
     def parse(
         self,
-        filename_rrf
-    ):
+        filename_mrsat_rrf: str,
+        filename_mrconso_rrf: str,
+    ) -> Dict[str, List[str]]:
+        """ Parses the MRSAT.rrf and MRCONSO.rrf files and creates a dictionary
+            keyed on MeSH descriptor IDs with values of lists of synonyms.
+
+        Args:
+            filename_mrconso_rrf (str): Path to the MRCONSO.rrf file.
+            filename_mrsat_rrf (str): Path to the MRSAT.rrf file.
+
+        Returns:
+            Dict[str, List[str]]: Result dictionary keyed on MeSH
+            descriptor IDs with values of lists of synonyms.
+        """
+
+        # Create a `ParserUmlsSat` parser and use it to parse the MRSAT.RRF file
+        # to create a map between CUIs and MeSH descriptor IDs.
+        parser_mrsat = ParserUmlsSat()
+        map_cui_dui = parser_mrsat.parse(filename_mrsat_rrf=filename_mrsat_rrf)
 
         msg = "Parsing UMLS MRCONSO RRF file '{0}'"
-        msg_fmt = msg.format(filename_rrf)
+        msg_fmt = msg.format(filename_mrconso_rrf)
         self.logger.info(msg=msg_fmt)
 
-        msg = "First pass through UMLS MRCONSO RRF file '{0}'"
-        msg_fmt = msg.format(filename_rrf)
-        self.logger.debug(msg=msg_fmt)
-
-        # First pass through the file. Iterate over all the lines and find MSH
-        # entries referring to a MeSH entity and append those lines to a
-        # list.
-        msh_rows = []
-        with open(filename_rrf, "r") as finp:
+        dui_synonyms = {}
+        with open(filename_mrconso_rrf, "r") as finp:
             reader = csv.DictReader(
                 finp,
                 fieldnames=self.fieldnames_mrconso,
@@ -1428,64 +1442,22 @@ class ParserUmlsConso(ParserBase):
                 if entry.get("LAT") != "ENG":
                     continue
 
-                row = {
-                    "cui": entry["CUI"],
-                    "entity_ui": entry["SDUI"],
-                    "synonym": entry["STR"],
-                }
-                msh_rows.append(row)
-
-        msg = "Second pass through UMLS MRCONSO RRF file '{0}'"
-        msg_fmt = msg.format(filename_rrf)
-        self.logger.debug(msg=msg_fmt)
-
-        # Second pass through the file. Iterate over all the lines and find all
-        # synonyms relating to a given CUI that was previously associated with
-        # a MeSH entity.
-        cui_synonyms = {msh_row["cui"]: [] for msh_row in msh_rows}
-        with open(filename_rrf, "r") as finp:
-            reader = csv.DictReader(
-                finp,
-                fieldnames=self.fieldnames_mrconso,
-                delimiter="|",
-            )
-
-            for entry in reader:
-                # Skip non-Engish entries.
-                if entry.get("LAT") != "ENG":
+                if entry["CUI"] not in map_cui_dui.keys():
                     continue
 
-                if entry["CUI"] not in cui_synonyms.keys():
-                    continue
+                dui = map_cui_dui[entry["CUI"]]
 
-                cui_synonyms[entry["CUI"]].append(entry["STR"])
-
-        # Iterate over the initially collected rows and create a
-        # entity_ui:synonyms dictionary with all synonyms for a given MeSH
-        # entity based on the associated CUIs that were collected prior.
-        entity_synonyms = {
-            msh_row["entity_ui"]: []
-            for msh_row in msh_rows
-        }
-        for msh_row in msh_rows:
-            entity_synonyms[msh_row["entity_ui"]].append(
-                msh_row["synonym"]
-            )
-            entity_synonyms[msh_row["entity_ui"]].extend(
-                cui_synonyms[msh_row["cui"]]
-            )
+                dui_synonyms.setdefault(dui, []).append(entry["STR"])
 
         # Lowercase all synonyms
-        for entity_ui, synonyms in entity_synonyms.items():
-            entity_synonyms[entity_ui] = [
-                synonym.lower() for synonym in synonyms
-            ]
+        for dui, synonyms in dui_synonyms.items():
+            dui_synonyms[dui] = [synonym.lower() for synonym in synonyms]
 
         # Deduplicate the synonyms.
-        for entity_ui, synonyms in entity_synonyms.items():
-            entity_synonyms[entity_ui] = list(set(synonyms))
+        for dui, synonyms in dui_synonyms.items():
+            dui_synonyms[dui] = list(set(synonyms))
 
-        return entity_synonyms
+        return dui_synonyms
 
 
 class ParserUmlsDef(ParserBase):
