@@ -2,12 +2,11 @@
 
 import abc
 import hashlib
-from typing import Union
+from typing import Union, List, Dict
 
 from fform.orm_mt import Concept
 from fform.orm_mt import Descriptor
 from fform.orm_mt import Qualifier
-from fform.orm_mt import Supplemental
 from fform.orm_mt import EntryCombinationType
 from fform.orm_mt import DescriptorDefinitionSourceType
 from fform.dals_mt import DalMesh
@@ -622,12 +621,20 @@ class IngesterDocumentDescriptor(IngesterDocumentBase):
 
 
 class IngesterUmlsConso(object):
+    """ Class used to ingest the MeSH descriptor synonyms parsed from the UMLS
+        MRCONSO.RRF through the `ParserUmlsConso` class and .
+    """
 
     def __init__(
         self,
         dal: DalMesh,
         **kwargs
     ):
+        """ Constructor and initialization.
+
+        Args:
+            dal (DalMesh): The DAL class used to interact with the database.
+        """
 
         # Internalize arguments.
         self.dal = dal
@@ -639,16 +646,23 @@ class IngesterUmlsConso(object):
 
     def ingest(
         self,
-        document: dict
-    ):
+        document: Dict[str, List[str]]
+    ) -> None:
+        """ The MRCONSO.RRF data dictionary parsed through the `ParserUmlsConso`
+            class.
 
-        msg = "Ingesting synonyms for {} MeSH entities."
+        Args:
+            document (Dict[str, List[str]]): The MRCONSO.RRF data dictionary
+                parsed through the `ParserUmlsConso` class.
+        """
+
+        msg = "Ingesting synonyms for {} MeSH descriptors."
         msg_fmt = msg.format(len(document.keys()))
         self.logger.info(msg_fmt)
 
-        # Iterate over the synonyms and ingest them according to the type of
-        # MeSH entity they're referring to.
-        for entity_ui, synonyms in document.items():
+        # Iterate over the descriptor synonyms and ingest them according to the
+        # type of MeSH entity they're referring to.
+        for descriptor_ui, synonyms in document.items():
 
             # Calculate the MD5s of the synonyms.
             md5s = [
@@ -656,78 +670,44 @@ class IngesterUmlsConso(object):
                 for synonym in synonyms
             ]
 
-            msg = "Ingesting synonyms for MeSH entity with UI '{}'"
-            msg_fmt = msg.format(entity_ui)
+            msg = "Ingesting synonyms for MeSH descriptor with UI '{}'."
+            msg_fmt = msg.format(descriptor_ui)
             self.logger.info(msg_fmt)
 
-            if entity_ui.startswith("D"):
-                descriptor = self.dal.get_by_attr(
-                    orm_class=Descriptor,
-                    attr_name="ui",
-                    attr_value=entity_ui,
-                )  # type: Descriptor
+            descriptor = self.dal.get_by_attr(
+                orm_class=Descriptor,
+                attr_name="ui",
+                attr_value=descriptor_ui,
+            )  # type: Descriptor
 
-                if not descriptor:
-                    msg = "No `Descriptor` record found with UI '{}'."
-                    msg_fmt = msg.format(entity_ui)
-                    self.logger.warning(msg_fmt)
-                    continue
-
-                self.dal.biodi_descriptor_synonyms(
-                    descriptor_id=descriptor.descriptor_id,
-                    synonyms=synonyms,
-                    md5s=md5s,
-                )
-            elif entity_ui.startswith("C"):
-                supplemental = self.dal.get_by_attr(
-                    orm_class=Supplemental,
-                    attr_name="ui",
-                    attr_value=entity_ui,
-                )  # type: Supplemental
-
-                if not supplemental:
-                    msg = "No `Supplemental` record found with UI '{}'."
-                    msg_fmt = msg.format(entity_ui)
-                    self.logger.warning(msg_fmt)
-                    continue
-
-                self.dal.biodi_supplemental_synonyms(
-                    supplemental_id=supplemental.supplemental_id,
-                    synonyms=synonyms,
-                    md5s=md5s,
-                )
-            elif entity_ui.startswith("Q"):
-                qualifier = self.dal.get_by_attr(
-                    orm_class=Qualifier,
-                    attr_name="ui",
-                    attr_value=entity_ui,
-                )  # type: Qualifier
-
-                if not qualifier:
-                    msg = "No `Qualifier` record found with UI '{}'."
-                    msg_fmt = msg.format(entity_ui)
-                    self.logger.warning(msg_fmt)
-                    continue
-
-                self.dal.biodi_qualifier_synonyms(
-                    qualifier_id=qualifier.qualifier_id,
-                    synonyms=synonyms,
-                    md5s=md5s,
-                )
-            else:
-                msg = "Unsupported MeSH entity with UI '{}' found."
-                msg_fmt = msg.format(entity_ui)
+            if not descriptor:
+                msg = "No `Descriptor` record found with UI '{}'."
+                msg_fmt = msg.format(descriptor_ui)
                 self.logger.warning(msg_fmt)
                 continue
 
+            self.dal.biodi_descriptor_synonyms(
+                descriptor_id=descriptor.descriptor_id,
+                synonyms=synonyms,
+                md5s=md5s,
+            )
+
 
 class IngesterUmlsDef(object):
+    """ Class used to ingest the MeSH descriptor definitions parsed from the
+        UMLS MRDEF.RRF through the `ParserUmlsDef` class.
+    """
 
     def __init__(
         self,
         dal: DalMesh,
         **kwargs
     ):
+        """ Constructor and initialization.
+
+        Args:
+            dal (DalMesh): The DAL class used to interact with the database.
+        """
 
         # Internalize arguments.
         self.dal = dal
@@ -741,6 +721,13 @@ class IngesterUmlsDef(object):
         self,
         document: dict
     ):
+        """ The MRDEF.RRF data dictionary parsed through the `ParserUmlsDef`
+            class.
+
+        Args:
+            document (Dict[str, List[str]]): The MRDEF.RRF data dictionary
+                parsed through the `ParserUmlsDef` class.
+        """
 
         msg = "Ingesting definitions for {} MeSH descriptors."
         msg_fmt = msg.format(len(document.keys()))
@@ -748,27 +735,28 @@ class IngesterUmlsDef(object):
 
         # Iterate over the definitions and ingest.
         for descriptor_ui, data in document.items():
+
+            msg = ("Ingesting definition for MeSH descriptor with "
+                   "UI '{}'")
+            msg_fmt = msg.format(descriptor_ui)
+            self.logger.info(msg_fmt)
+
+            descriptor = self.dal.get_by_attr(
+                orm_class=Descriptor,
+                attr_name="ui",
+                attr_value=descriptor_ui,
+            )  # type: Descriptor
+
+            if not descriptor:
+                msg = "No `Descriptor` record found with UI '{}'."
+                msg_fmt = msg.format(descriptor_ui)
+                self.logger.warning(msg_fmt)
+                continue
+
             for source, definitions in data.items():
                 for definition in definitions:
                     # Calculate the MD5 of the definition.
                     md5 = hashlib.md5(definition.encode("utf-8")).digest()
-
-                    msg = ("Ingesting definition for MeSH descriptor with "
-                           "UI '{}'")
-                    msg_fmt = msg.format(descriptor_ui)
-                    self.logger.info(msg_fmt)
-
-                    descriptor = self.dal.get_by_attr(
-                        orm_class=Descriptor,
-                        attr_name="ui",
-                        attr_value=descriptor_ui,
-                    )  # type: Descriptor
-
-                    if not descriptor:
-                        msg = "No `Descriptor` record found with UI '{}'."
-                        msg_fmt = msg.format(descriptor_ui)
-                        self.logger.warning(msg_fmt)
-                        continue
 
                     self.dal.iodi_descriptor_definition(
                         descriptor_id=descriptor.descriptor_id,
