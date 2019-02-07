@@ -588,7 +588,8 @@ class IngesterDocumentDescriptor(IngesterDocumentBase):
         # Upsert the `DescriptorPharmacologicalActionDescriptor` records.
         if self.do_ingest_links:
             for doc_pharmacological_action in doc.get(
-                "PharmacologicalActionList"):
+                "PharmacologicalActionList"
+            ):
                 self.dal.iodi_descriptor_pharmacological_action_descriptor(
                     descriptor_id=descriptor_id,
                     pharmacological_action_descriptor_id=self.dal.get_by_attrs(

@@ -1392,7 +1392,8 @@ class ParserUmlsConso(ParserBase):
         self,
         **kwargs: dict
     ):
-        """Constructor and initialization."""
+        """ Constructor and initialization."""
+
         super(ParserUmlsConso, self).__init__(kwargs=kwargs)
 
     def parse(
@@ -1488,6 +1489,7 @@ class ParserUmlsDef(ParserBase):
         **kwargs: dict
     ):
         """ Constructor and initialization."""
+
         super(ParserUmlsDef, self).__init__(kwargs=kwargs)
 
     def parse(
