@@ -500,7 +500,8 @@ class ParserXmlMeshBase(ParserXmlBase):
             "TranslatorsScopeNote": self._et(
                 element.find("TranslatorsScopeNote"),
             ),
-            "RelatedRegistryNumberList": self.parse_related_registry_number_list(
+            "RelatedRegistryNumberList":
+                self.parse_related_registry_number_list(
                 element.find("RelatedRegistryNumberList"),
             ),
             "ConceptRelationList": self.parse_concept_relation_list(
