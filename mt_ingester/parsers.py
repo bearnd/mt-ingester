@@ -981,6 +981,8 @@ class ParserXmlMeshDescriptors(ParserXmlMeshBase):
 
             yield descriptor_record
 
+        file_xml.close()
+
 
 class ParserXmlMeshQualifiers(ParserXmlMeshBase):
     def __init__(self, **kwargs):
@@ -1042,6 +1044,8 @@ class ParserXmlMeshQualifiers(ParserXmlMeshBase):
                 continue
 
             yield qualifier_record
+
+        file_xml.close()
 
 
 class ParserXmlMeshSupplementals(ParserXmlMeshBase):
@@ -1279,6 +1283,8 @@ class ParserXmlMeshSupplementals(ParserXmlMeshBase):
                 continue
 
             yield supplemental_record
+
+        file_xml.close()
 
 
 class ParserUmlsSat(ParserBase):
