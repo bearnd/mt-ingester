@@ -58,8 +58,8 @@ class ParserMeshQualifiersTest(unittest.TestCase):
         self.assertEqual(record["HistoryNote"], "2017(1967)")
         self.assertEqual(
             record["OnlineNote"],
-            "search policy: Online Manual; use: main heading/AB or AB (SH) "
-            "or SUBS APPLY AB",
+            ("search policy: Online Manual; use: main heading/AB or AB (SH) "
+             "or SUBS APPLY AB"),
         )
         # Skipping `TreeNumberList`. Covered in different unit-tests.
         self.assertTrue(record["TreeNumberList"])
