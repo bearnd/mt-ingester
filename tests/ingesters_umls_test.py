@@ -84,8 +84,8 @@ class IngesterUmlsConsoTest(DalMtTestBase):
         os.remove(self.file_mrsat.name)
         os.remove(self.file_mrconso.name)
 
-    def test_parse(self):
-        """ Tests the `parse` method of the parser class."""
+    def test_ingester(self):
+        """ Tests the `ingester` method of the ingester class."""
 
         dui_ids = []
         for dui in self.dui_synonyms.keys():
@@ -139,8 +139,8 @@ class IngesterUmlsDefTest(DalMtTestBase):
         os.remove(self.file_mrsat.name)
         os.remove(self.file_mrdef.name)
 
-    def test_parse(self):
-        """ Tests the `parse` method of the parser class."""
+    def test_ingest(self):
+        """ Tests the `ingest` method of the ingester class."""
 
         dui_ids = []
         for dui in self.dui_definitions.keys():
