@@ -290,6 +290,8 @@ class IngesterDocumentQualifier(IngesterDocumentBase):
                 is_preferred=doc_concept.get("PreferredConceptYN"),
             )
 
+        return qualifier_id
+
 
 class IngesterDocumentSupplemental(IngesterDocumentBase):
     """Class to ingest a parsed XML `<SupplementalRecord>` document."""
@@ -439,6 +441,8 @@ class IngesterDocumentSupplemental(IngesterDocumentBase):
                 concept_id=concept_id,
                 is_preferred=doc_concept.get("PreferredConceptYN"),
             )
+
+        return supplemental_id
 
 
 class IngesterDocumentDescriptor(IngesterDocumentBase):
@@ -618,6 +622,8 @@ class IngesterDocumentDescriptor(IngesterDocumentBase):
                 concept_id=concept_id,
                 is_preferred=doc_concept.get("PreferredConceptYN"),
             )
+
+        return descriptor_id
 
 
 class IngesterUmlsConso(object):
