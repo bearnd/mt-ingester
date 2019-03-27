@@ -1,5 +1,25 @@
 ## Changelog
 
+### v0.4.0
+
+Issue No. 194:
+
+- Created a new `ParserUmlsSat` parser class capable of parsing the `MRSAT.RRF` file and creating a dictionary keyed on UMLS CUIs and valued with MeSH descriptor IDs. Subsequently I removed this code from `ParserUmlsDef` which is now using the aforementioned class.
+- Updated the `ParserUmlsConso` class so that it uses the new `ParserUmlsSat` class to establish a relationship between UMLS CUIs and MeSH descriptor IDs. This new dictionary is being used instead of performing multiple passes over the `MRCONSO.RRF` file and as such only synonyms for MeSH descriptors are extracted.
+- Updated Makefile to run unit-tests with `unittest`.
+- Added test packages and sample strings containing portions of the UMLS files processed by the different parser classes.
+- Added unit-tests for the UMLS parsers.
+- Updated the `IngesterUmlsConso` and `IngesterUmlsDef` to only ingest synonyms and definitions for descriptors and added docstrings.
+- Updated Ansible role and added the extra schemata to allow for unit-testing.
+- Added a new module with DAL mixin classes to be used in unit-tests.
+- Added a new module with a utility function to load the service configuration.
+- Added unit-tests for the UMLS ingester classes.
+- Updated the `parse` methods of the MeSH parser classes to close the XML file once parsing is complete.
+- Added a new module with MeSH file samples.
+- Added unit-tests for the MeSH parsers.
+- Updated the `ingest` methods of the MeSH ingester classes to return the ID of the newly created record.
+- Added unit-tests for the different MeSH ingester classes.
+
 ### v0.3.1
 
 - Bug fixes.
