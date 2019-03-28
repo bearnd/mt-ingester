@@ -1,5 +1,11 @@
 ## Changelog
 
+### v0.4.1
+
+- Fixed issue in the `ingest` method of the `IngesterDocumentSupplemental` class where a missing descriptor would cause an exception to be raised.
+- Updated the entry script to support UMLS definition ingestion while also updating the way files are defined for UMLS synonym ingestion.
+- Added a simple ingestion script for the 2019 datasets.
+
 ### v0.4.0
 
 Issue No. 194:
