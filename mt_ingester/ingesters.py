@@ -390,15 +390,17 @@ class IngesterDocumentSupplemental(IngesterDocumentBase):
         if self.do_ingest_links:
             for doc_indexing_informations in doc.get("IndexingInformationList"):
                 # Upsert the `EntryCombination` record.
+                descriptor = self.dal.get_by_attrs(
+                    Descriptor,
+                    {"ui": self._get_dref_ui(doc_indexing_informations)}
+                )
                 qualifier = self.dal.get_by_attrs(
                     Qualifier,
                     {"ui": self._get_qref_ui(doc_indexing_informations)}
                 )
                 entry_combination_id = self.dal.iodu_entry_combination(
-                    descriptor_id=self.dal.get_by_attrs(
-                        Descriptor,
-                        {"ui": self._get_dref_ui(doc_indexing_informations)}
-                    ).descriptor_id,
+                    descriptor_id=descriptor.descriptor_id
+                    if descriptor else None,
                     qualifier_id=qualifier.qualifier_id if qualifier else None,
                     combination_type=None,
                 )
