@@ -12,10 +12,12 @@ from mt_ingester.parsers import ParserXmlMeshDescriptors
 from mt_ingester.parsers import ParserXmlMeshQualifiers
 from mt_ingester.parsers import ParserXmlMeshSupplementals
 from mt_ingester.parsers import ParserUmlsConso
+from mt_ingester.parsers import ParserUmlsDef
 from mt_ingester.ingesters import IngesterDocumentDescriptor
 from mt_ingester.ingesters import IngesterDocumentQualifier
 from mt_ingester.ingesters import IngesterDocumentSupplemental
 from mt_ingester.ingesters import IngesterUmlsConso
+from mt_ingester.ingesters import IngesterUmlsDef
 from mt_ingester.config import import_config
 
 
@@ -66,16 +68,18 @@ def main(args):
     elif arguments.mode == "synonyms":
         parser = ParserUmlsConso()
         ingester = IngesterUmlsConso(dal=dal)
+    elif arguments.mode == "definitions":
+        parser = ParserUmlsDef()
+        ingester = IngesterUmlsDef(dal=dal)
 
     if arguments.mode in ["descriptors", "qualifiers", "supplementals"]:
         for filename in args.filenames:
             docs = parser.parse(filename_xml=filename)
             for doc in docs:
                 ingester.ingest(doc=doc)
-    elif arguments.mode == "synonyms":
-        for filename in args.filenames:
-            docs = parser.parse(filename)
-            ingester.ingest(docs)
+    elif arguments.mode in ("synonyms", "definitions"):
+        docs = parser.parse(args.filenames[0], args.filenames[1])
+        ingester.ingest(docs)
 
 
 # main sentinel
@@ -98,6 +102,7 @@ if __name__ == "__main__":
             "qualifiers",
             "supplementals",
             "synonyms",
+            "definitions",
         ],
         required=True,
     )
