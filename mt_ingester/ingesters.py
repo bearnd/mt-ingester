@@ -370,19 +370,21 @@ class IngesterDocumentSupplemental(IngesterDocumentBase):
                     Qualifier,
                     {"ui": self._get_qref_ui(doc_heading_mapped_to)}
                 )
-                entry_combination_id = self.dal.iodu_entry_combination(
-                    descriptor_id=self.dal.get_by_attrs(
-                        Descriptor,
-                        {"ui": self._get_dref_ui(doc_heading_mapped_to)}
-                    ).descriptor_id,
-                    qualifier_id=qualifier.qualifier_id if qualifier else None,
-                    combination_type=None,
+                descriptor = self.dal.get_by_attrs(
+                    Descriptor,
+                    {"ui": self._get_dref_ui(doc_heading_mapped_to)}
                 )
-                # Upsert the `SupplementalHeadingMappedTo` record.
-                self.dal.iodi_supplemental_heading_mapped_to(
-                    supplemental_id=supplemental_id,
-                    entry_combination_id=entry_combination_id
-                )
+                if qualifier and descriptor:
+                    entry_combination_id = self.dal.iodu_entry_combination(
+                        descriptor_id=descriptor.descriptor_id,
+                        qualifier_id=qualifier.qualifier_id,
+                        combination_type=None,
+                    )
+                    # Upsert the `SupplementalHeadingMappedTo` record.
+                    self.dal.iodi_supplemental_heading_mapped_to(
+                        supplemental_id=supplemental_id,
+                        entry_combination_id=entry_combination_id
+                    )
 
         # Upsert the `EntryCombination` records representing the
         # `<IndexingInformation>` elements and the
@@ -398,30 +400,34 @@ class IngesterDocumentSupplemental(IngesterDocumentBase):
                     Qualifier,
                     {"ui": self._get_qref_ui(doc_indexing_informations)}
                 )
-                entry_combination_id = self.dal.iodu_entry_combination(
-                    descriptor_id=descriptor.descriptor_id
-                    if descriptor else None,
-                    qualifier_id=qualifier.qualifier_id if qualifier else None,
-                    combination_type=None,
-                )
-                # Upsert the `SupplementalIndexingInformation` record.
-                self.dal.iodi_supplemental_indexing_information(
-                    supplemental_id=supplemental_id,
-                    entry_combination_id=entry_combination_id,
-                )
+                if descriptor and qualifier:
+                    entry_combination_id = self.dal.iodu_entry_combination(
+                        descriptor_id=descriptor.descriptor_id,
+                        qualifier_id=qualifier.qualifier_id,
+                        combination_type=None,
+                    )
+                    # Upsert the `SupplementalIndexingInformation` record.
+                    self.dal.iodi_supplemental_indexing_information(
+                        supplemental_id=supplemental_id,
+                        entry_combination_id=entry_combination_id,
+                    )
 
         # Upsert the `SupplementalPharmacologicalActionDescriptor` records.
         if self.do_ingest_links:
             for doc_pharmacological_action in doc.get(
                     "PharmacologicalActionList"
             ):
-                self.dal.iodi_supplemental_pharmacological_action_descriptor(
-                    supplemental_id=supplemental_id,
-                    pharmacological_action_descriptor_id=self.dal.get_by_attrs(
-                        Descriptor,
-                        {"ui": self._get_dref_ui(doc_pharmacological_action)},
-                    ).descriptor_id,
+                descriptor = self.dal.get_by_attrs(
+                    Descriptor,
+                    {"ui": self._get_dref_ui(doc_pharmacological_action)},
                 )
+                if descriptor:
+                    self.dal.\
+                        iodi_supplemental_pharmacological_action_descriptor(
+                            supplemental_id=supplemental_id,
+                            pharmacological_action_descriptor_id
+                            =descriptor.descriptor_id,
+                        )
 
         # Upsert the `Source` and `SupplementalSource` records.
         for doc_source in doc.get("SourceList"):
