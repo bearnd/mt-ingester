@@ -17,4 +17,4 @@ python -m mt_ingester.mt_ingester --mode supplementals --do-ingest-links --confi
 # Ingest MeSH descriptor synonyms.
 python -m mt_ingester.mt_ingester --mode synonyms --config-file="/etc/mt-ingester/mt-ingester.json" /mnt/Downloads/_DUMP/download_station/UMLS/2018AB/MRSAT_SUBSET.RRF /mnt/Downloads/_DUMP/download_station/UMLS/2018AB/MRCONSO_SUBSET.RRF
 # Ingest MeSH descriptor definitions.
-python -m mt_ingester.mt_ingester --mode synonyms --config-file="/etc/mt-ingester/mt-ingester.json" /mnt/Downloads/_DUMP/download_station/UMLS/2018AB/MRDEF.RRF /mnt/Downloads/_DUMP/download_station/UMLS/2018AB/MRSAT_SUBSET.RRF
+python -m mt_ingester.mt_ingester --mode definitions --config-file="/etc/mt-ingester/mt-ingester.json" /mnt/Downloads/_DUMP/download_station/UMLS/2018AB/MRDEF.RRF /mnt/Downloads/_DUMP/download_station/UMLS/2018AB/MRSAT_SUBSET.RRF
