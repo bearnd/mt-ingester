@@ -768,6 +768,9 @@ class IngesterUmlsDef(object):
                 continue
 
             for source, definitions in data.items():
+                if not source:
+                    continue
+
                 for definition in definitions:
                     # Calculate the MD5 of the definition.
                     md5 = hashlib.md5(definition.encode("utf-8")).digest()
