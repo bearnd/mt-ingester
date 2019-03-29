@@ -1,5 +1,9 @@
 ## Changelog
 
+### v0.4.2
+
+- Fixed more issues in the `ingest` method of the `IngesterDocumentSupplemental` class where a missing descriptor would cause an exception to be raised.
+
 ### v0.4.1
 
 - Fixed issue in the `ingest` method of the `IngesterDocumentSupplemental` class where a missing descriptor would cause an exception to be raised.
