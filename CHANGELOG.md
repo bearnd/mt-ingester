@@ -1,5 +1,9 @@
 ## Changelog
 
+### v0.4.4
+
+- Fixed the fix that didn’t correctly skip unknown sources in the `ingest` method of the `IngesterUmlsDef` class.
+
 ### v0.4.3
 
 - Added simple escape clause to skip source-less entries.
