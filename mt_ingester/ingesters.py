@@ -768,7 +768,10 @@ class IngesterUmlsDef(object):
                 continue
 
             for source, definitions in data.items():
-                if not source:
+                source_member = DescriptorDefinitionSourceType.get_member(
+                    source,
+                )
+                if not source_member:
                     continue
 
                 for definition in definitions:
@@ -777,9 +780,7 @@ class IngesterUmlsDef(object):
 
                     self.dal.iodi_descriptor_definition(
                         descriptor_id=descriptor.descriptor_id,
-                        source=DescriptorDefinitionSourceType.get_member(
-                            source,
-                        ),
+                        source=source_member,
                         definition=definition,
                         md5=md5,
                     )
