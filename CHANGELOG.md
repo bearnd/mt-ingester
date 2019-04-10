@@ -1,5 +1,9 @@
 ## Changelog
 
+### v0.4.6
+
+- Updated the `parse` method of the `ParserUmlsConso` class and removed filtering on the `ENG` language as it removes a lot of useful synonyms.
+
 ### v0.4.5
 
 - Updated the `parse` method of the `ParserUmlsConso` class and removed filtering on `MSH` sources as it removes a lot of useful synonyms.
