@@ -1445,6 +1445,10 @@ class ParserUmlsConso(ParserBase):
                 if entry["CUI"] not in map_cui_dui.keys():
                     continue
 
+                # Skip non-Engish entries.
+                if entry.get("LAT") != "ENG":
+                    continue
+
                 dui = map_cui_dui[entry["CUI"]]
 
                 dui_synonyms.setdefault(dui, []).append(entry["STR"])
