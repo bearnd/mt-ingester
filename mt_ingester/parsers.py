@@ -1438,10 +1438,6 @@ class ParserUmlsConso(ParserBase):
             )
 
             for entry in reader:
-                # Skip entries that do not refer to MeSH.
-                if not entry.get("SAB") == "MSH":
-                    continue
-
                 # Skip that do not refer to a MeSH entity.
                 if not entry.get("SDUI"):
                     continue
