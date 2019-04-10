@@ -1,5 +1,13 @@
 ## Changelog
 
+### v0.5.0
+
+Issue No. 203: Insufficient UMLS synonyms
+
+- Updated the `parse` method of the `ParserUmlsConso` class and re-introduced the filter on english synonyms only.
+- Updated the `parse` method of the `ParserUmlsSat` class and modified the parsing so that both `MESH_DUI` and `TERMUI` entries are accounted for.
+- Updated unit-tests.
+
 ### v0.4.6
 
 - Updated the `parse` method of the `ParserUmlsConso` class and removed filtering on the `ENG` language as it removes a lot of useful synonyms.
