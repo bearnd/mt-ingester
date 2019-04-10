@@ -1329,8 +1329,8 @@ class ParserUmlsSat(ParserBase):
             filename_mrsat_rrf (str): Path to the MRSAT.rrf file.
 
         Returns:
-            Dict[str, str]: Result dictionary keyed on UMLS CUIs with values of
-                MeSH descriptor IDs.
+            Dict[str, str]: Result dictionary keyed on UMLS CUIs with
+                values of MeSH descriptor IDs.
         """
 
         msg = "Parsing UMLS MRSAT RRF file '{0}'"
@@ -1350,14 +1350,35 @@ class ParserUmlsSat(ParserBase):
             for entry in reader:
                 # Skip entries that don't establish the relationship between
                 # a UMLS concept and a MeSH descriptor.
-                if not entry.get("ATN") == "MESH_DUI":
+                if not entry.get("ATN") in ("MESH_DUI", "TERMUI"):
                     continue
 
                 # Skip entries that don't define a value for CUI or ATV.
                 if not entry.get("CUI") or not entry.get("ATV"):
                     continue
 
-                map_cui_dui[entry["CUI"]] = entry["ATV"]
+                # Retrieve the UMLS CUI.
+                cui = entry["CUI"]
+
+                # Retrieve the MeSH DUI depending on the value of `ATN`.
+                if entry["ATN"] == "TERMUI":
+                    if (
+                        not entry["CODE"] or
+                        not entry["CODE"].startswith("D")
+                    ):
+                        continue
+                    dui = entry["CODE"]
+                elif entry["ATN"] == "MESH_DUI":
+                    if (
+                        not entry["ATV"] or
+                        not entry["ATV"].startswith("D")
+                    ):
+                        continue
+                    dui = entry["ATV"]
+                else:
+                    raise NotImplementedError
+
+                map_cui_dui[cui] = dui
 
         return map_cui_dui
 
