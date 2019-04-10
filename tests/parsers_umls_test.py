@@ -37,6 +37,10 @@ class ParserUmlsSatTest(unittest.TestCase):
                 'C0001175': 'D000163',
                 'C0006118': 'D001932',
                 'C0024537': 'D016780',
+                'C0153633': 'D001932',
+                'C0750974': 'D001932',
+                'C0750979': 'D001932',
+                'C1527390': 'D001932',
             }
         )
 
@@ -74,15 +78,19 @@ class ParserUmlsConsoTest(unittest.TestCase):
 
         dui_synonyms_refr = {
             'D000163': [
+                'acquired immunodeficiency syndrome',
                 'acquired immunodeficiency syndromes',
-                'syndromes, acquired immunodeficiency'
+                'syndromes, acquired immunodeficiency',
             ],
             'D001932': [
                 'neoplasm, brain',
-                'brain tumors'
+                'brain tumors',
+                'brain tumors, primary',
+                'neoplasms, intracranial',
             ],
             'D016780': [
-                'plasmodium vivax malaria', 'vivax malaria'
+                'plasmodium vivax malaria',
+                'vivax malaria',
             ]
         }
 
