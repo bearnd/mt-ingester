@@ -1,5 +1,9 @@
 ## Changelog
 
+### v0.4.5
+
+- Updated the `parse` method of the `ParserUmlsConso` class and removed filtering on `MSH` sources as it removes a lot of useful synonyms.
+
 ### v0.4.4
 
 - Fixed the fix that didn’t correctly skip unknown sources in the `ingest` method of the `IngesterUmlsDef` class.
