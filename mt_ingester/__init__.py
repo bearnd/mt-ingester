@@ -4,7 +4,7 @@
 
 __author__ = """Adamos Kyriakou"""
 __email__ = 'somada141@gmail.com'
-__version__ = '0.5.0'
+__version__ = '0.5.1'
 
 from mt_ingester import config
 from mt_ingester import excs

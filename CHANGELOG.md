@@ -1,5 +1,10 @@
 ## Changelog
 
+### v0.5.1
+
+- Updated ingestion script to use environment variables defining the location of the MeSH and UMLS data.
+- Consolidated ingestion scripts.
+
 ### v0.5.0
 
 Issue No. 203: Insufficient UMLS synonyms
