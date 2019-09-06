@@ -1,5 +1,9 @@
 ## Changelog
 
+### v0.5.2
+
+- Fixed issues in `ingest.sh`.
+
 ### v0.5.1
 
 - Updated ingestion script to use environment variables defining the location of the MeSH and UMLS data.
