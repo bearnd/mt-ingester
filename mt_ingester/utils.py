@@ -1,9 +1,7 @@
 # coding=utf-8
 
 
-def log_ingestion_of_document(
-    document_name: str
-):
+def log_ingestion_of_document(document_name: str):
 
     # Define the actual decorator. This three-tier decorator functions are
     # necessary when defining decorator functions with arguments.

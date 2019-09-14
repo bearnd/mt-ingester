@@ -3,8 +3,8 @@
 """Top-level package for mt-ingester."""
 
 __author__ = """Adamos Kyriakou"""
-__email__ = 'somada141@gmail.com'
-__version__ = '0.5.2'
+__email__ = "somada141@gmail.com"
+__version__ = "0.5.2"
 
 from mt_ingester import config
 from mt_ingester import excs

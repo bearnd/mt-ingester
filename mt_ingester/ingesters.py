@@ -16,12 +16,7 @@ from mt_ingester.utils import log_ingestion_of_document
 
 
 class IngesterDocumentBase(object):
-    def __init__(
-        self,
-        dal,
-        do_ingest_links: bool,
-        **kwargs
-    ):
+    def __init__(self, dal, do_ingest_links: bool, **kwargs):
 
         # Internalize arguments.
         self.do_ingest_links = do_ingest_links
@@ -29,13 +24,11 @@ class IngesterDocumentBase(object):
 
         self.logger = create_logger(
             logger_name=type(self).__name__,
-            logger_level=kwargs.get("logger_level", "DEBUG")
+            logger_level=kwargs.get("logger_level", "DEBUG"),
         )
 
     @staticmethod
-    def _get_dref_ui(
-        doc: dict
-    ) -> Union[str, None]:
+    def _get_dref_ui(doc: dict) -> Union[str, None]:
         """Retrieves the UI from a descriptor reference.
 
         Args:
@@ -53,9 +46,7 @@ class IngesterDocumentBase(object):
         return ui
 
     @staticmethod
-    def _get_qref_ui(
-        doc: dict
-    ) -> Union[str, None]:
+    def _get_qref_ui(doc: dict) -> Union[str, None]:
         """Retrieves the UI from a qualifier reference.
 
         Args:
@@ -73,10 +64,7 @@ class IngesterDocumentBase(object):
         return ui
 
     @log_ingestion_of_document(document_name="TreeNumber")
-    def ingest_tree_number(
-        self,
-        doc: dict,
-    ) -> Union[int, None]:
+    def ingest_tree_number(self, doc: dict) -> Union[int, None]:
         """Ingests a parsed element of type `<TreeNumber>` and creates a
         `TreeNumber` record.
 
@@ -93,17 +81,12 @@ class IngesterDocumentBase(object):
 
         tree_number = doc.get("TreeNumber")
         # Upsert the `TreeNumber` record.
-        tree_number_id = self.dal.iodi_tree_number(
-            tree_number=tree_number
-        )
+        tree_number_id = self.dal.iodi_tree_number(tree_number=tree_number)
 
         return tree_number_id
 
     @log_ingestion_of_document(document_name="Term")
-    def ingest_term(
-        self,
-        doc: dict,
-    ) -> Union[int, None]:
+    def ingest_term(self, doc: dict) -> Union[int, None]:
         """Ingests a parsed element of type `<Term>` and creates a `Term`
         record.
 
@@ -136,17 +119,13 @@ class IngesterDocumentBase(object):
             )
             # Upsert `TermThesaurusId` record.
             self.dal.iodi_term_thesaurus_id(
-                term_id=term_id,
-                thesaurus_id_id=thesaurus_id_id,
+                term_id=term_id, thesaurus_id_id=thesaurus_id_id
             )
 
         return term_id
 
     @log_ingestion_of_document(document_name="Concept")
-    def ingest_concept(
-        self,
-        doc: dict,
-    ) -> Union[int, None]:
+    def ingest_concept(self, doc: dict) -> Union[int, None]:
         """Ingests a parsed element of type `<Concept>` and creates a
         `Concept` record.
 
@@ -168,7 +147,7 @@ class IngesterDocumentBase(object):
             registry_number=doc.get("RegistryNumber"),
             scope_note=doc.get("ScopeNote"),
             translators_english_scope_note=doc.get(
-                "TranslatorsEnglishScopeNote",
+                "TranslatorsEnglishScopeNote"
             ),
             translators_scope_note=doc.get("TranslatorsScopeNote"),
         )
@@ -178,12 +157,10 @@ class IngesterDocumentBase(object):
             for doc_concept_relations in doc.get("ConceptRelationList"):
                 self.dal.iodu_concept_related_concept(
                     concept_id=self.dal.get_by_attrs(
-                        Concept,
-                        {"ui": doc_concept_relations.get("Concept1UI")}
+                        Concept, {"ui": doc_concept_relations.get("Concept1UI")}
                     ).concept_id,
                     related_concept_id=self.dal.get_by_attrs(
-                        Concept,
-                        {"ui": doc_concept_relations.get("Concept2UI")}
+                        Concept, {"ui": doc_concept_relations.get("Concept2UI")}
                     ).concept_id,
                     relation_name=doc_concept_relations.get("RelationName"),
                 )
@@ -198,7 +175,7 @@ class IngesterDocumentBase(object):
                 concept_id=concept_id,
                 term_id=term_id,
                 is_concept_preferred_term=doc_term.get(
-                    "ConceptPreferredTermYN",
+                    "ConceptPreferredTermYN"
                 ),
                 is_permuted_term=doc_term.get("IsPermutedTermYN"),
                 lexical_tag=doc_term.get("LexicalTag"),
@@ -208,22 +185,14 @@ class IngesterDocumentBase(object):
         return concept_id
 
     @abc.abstractmethod
-    def ingest(
-        self,
-        document: dict
-    ):
+    def ingest(self, document: dict):
         raise NotImplementedError
 
 
 class IngesterDocumentQualifier(IngesterDocumentBase):
     """Class to ingest a parsed XML `<QualifierRecord>` document."""
 
-    def __init__(
-        self,
-        dal: DalMesh,
-        do_ingest_links: bool,
-        **kwargs
-    ):
+    def __init__(self, dal: DalMesh, do_ingest_links: bool, **kwargs):
         """Constructor and initialization.
 
         Args:
@@ -232,16 +201,11 @@ class IngesterDocumentQualifier(IngesterDocumentBase):
         """
 
         super(IngesterDocumentQualifier, self).__init__(
-            dal=dal,
-            do_ingest_links=do_ingest_links,
-            kwargs=kwargs,
+            dal=dal, do_ingest_links=do_ingest_links, kwargs=kwargs
         )
 
     @log_ingestion_of_document(document_name="QualifierRecord")
-    def ingest(
-        self,
-        doc: dict,
-    ) -> Union[int, None]:
+    def ingest(self, doc: dict) -> Union[int, None]:
         """Ingests a parsed element of type `<QualifierRecord>` and creates a
         `Qualifier` record.
 
@@ -275,8 +239,7 @@ class IngesterDocumentQualifier(IngesterDocumentBase):
             tree_number_id = self.ingest_tree_number(doc_tree_number)
             # Upsert the `QualifierTreeNumber` record.
             self.dal.iodi_qualifier_tree_number(
-                qualifier_id=qualifier_id,
-                tree_number_id=tree_number_id
+                qualifier_id=qualifier_id, tree_number_id=tree_number_id
             )
 
         # Upsert the `Concept` and `QualifierConcept` records.
@@ -296,12 +259,7 @@ class IngesterDocumentQualifier(IngesterDocumentBase):
 class IngesterDocumentSupplemental(IngesterDocumentBase):
     """Class to ingest a parsed XML `<SupplementalRecord>` document."""
 
-    def __init__(
-        self,
-        dal: DalMesh,
-        do_ingest_links: bool,
-        **kwargs
-    ):
+    def __init__(self, dal: DalMesh, do_ingest_links: bool, **kwargs):
         """Constructor and initialization.
 
         Args:
@@ -310,16 +268,11 @@ class IngesterDocumentSupplemental(IngesterDocumentBase):
         """
 
         super(IngesterDocumentSupplemental, self).__init__(
-            dal=dal,
-            do_ingest_links=do_ingest_links,
-            kwargs=kwargs,
+            dal=dal, do_ingest_links=do_ingest_links, kwargs=kwargs
         )
 
     @log_ingestion_of_document(document_name="SupplementalRecord")
-    def ingest(
-        self,
-        doc: dict,
-    ) -> Union[int, None]:
+    def ingest(self, doc: dict) -> Union[int, None]:
         """Ingests a parsed element of type `<SupplementalRecord>` and creates a
         `Supplemental` record.
 
@@ -350,9 +303,7 @@ class IngesterDocumentSupplemental(IngesterDocumentBase):
         for doc_previous_indexings in doc.get("PreviousIndexingList"):
             # Upsert the `PreviousIndexing` record.
             previous_indexing_id = self.dal.iodi_previous_indexing(
-                previous_indexing=doc_previous_indexings.get(
-                    "PreviousIndexing",
-                ),
+                previous_indexing=doc_previous_indexings.get("PreviousIndexing")
             )
             # Upsert the `SupplementalPreviousIndexing` record.
             self.dal.iodi_supplemental_previous_indexing(
@@ -367,12 +318,10 @@ class IngesterDocumentSupplemental(IngesterDocumentBase):
             for doc_heading_mapped_to in doc.get("HeadingMappedToList"):
                 # Upsert the `EntryCombination` record.
                 qualifier = self.dal.get_by_attrs(
-                    Qualifier,
-                    {"ui": self._get_qref_ui(doc_heading_mapped_to)}
+                    Qualifier, {"ui": self._get_qref_ui(doc_heading_mapped_to)}
                 )
                 descriptor = self.dal.get_by_attrs(
-                    Descriptor,
-                    {"ui": self._get_dref_ui(doc_heading_mapped_to)}
+                    Descriptor, {"ui": self._get_dref_ui(doc_heading_mapped_to)}
                 )
                 if qualifier and descriptor:
                     entry_combination_id = self.dal.iodu_entry_combination(
@@ -383,7 +332,7 @@ class IngesterDocumentSupplemental(IngesterDocumentBase):
                     # Upsert the `SupplementalHeadingMappedTo` record.
                     self.dal.iodi_supplemental_heading_mapped_to(
                         supplemental_id=supplemental_id,
-                        entry_combination_id=entry_combination_id
+                        entry_combination_id=entry_combination_id,
                     )
 
         # Upsert the `EntryCombination` records representing the
@@ -394,11 +343,11 @@ class IngesterDocumentSupplemental(IngesterDocumentBase):
                 # Upsert the `EntryCombination` record.
                 descriptor = self.dal.get_by_attrs(
                     Descriptor,
-                    {"ui": self._get_dref_ui(doc_indexing_informations)}
+                    {"ui": self._get_dref_ui(doc_indexing_informations)},
                 )
                 qualifier = self.dal.get_by_attrs(
                     Qualifier,
-                    {"ui": self._get_qref_ui(doc_indexing_informations)}
+                    {"ui": self._get_qref_ui(doc_indexing_informations)},
                 )
                 if descriptor and qualifier:
                     entry_combination_id = self.dal.iodu_entry_combination(
@@ -415,19 +364,18 @@ class IngesterDocumentSupplemental(IngesterDocumentBase):
         # Upsert the `SupplementalPharmacologicalActionDescriptor` records.
         if self.do_ingest_links:
             for doc_pharmacological_action in doc.get(
-                    "PharmacologicalActionList"
+                "PharmacologicalActionList"
             ):
                 descriptor = self.dal.get_by_attrs(
                     Descriptor,
                     {"ui": self._get_dref_ui(doc_pharmacological_action)},
                 )
                 if descriptor:
-                    self.dal.\
-                        iodi_supplemental_pharmacological_action_descriptor(
-                            supplemental_id=supplemental_id,
-                            pharmacological_action_descriptor_id
-                            =descriptor.descriptor_id,
-                        )
+                    # noinspection LongLine
+                    self.dal.iodi_supplemental_pharmacological_action_descriptor(
+                        supplemental_id=supplemental_id,
+                        pharmacological_action_descriptor_id=descriptor.descriptor_id,
+                    )
 
         # Upsert the `Source` and `SupplementalSource` records.
         for doc_source in doc.get("SourceList"):
@@ -435,8 +383,7 @@ class IngesterDocumentSupplemental(IngesterDocumentBase):
             source_id = self.dal.iodi_source(source=doc_source.get("Source"))
             # Upsert the `SupplementalSource` record.
             self.dal.iodi_supplemental_source(
-                supplemental_id=supplemental_id,
-                source_id=source_id,
+                supplemental_id=supplemental_id, source_id=source_id
             )
 
         # Upsert the `Concept` and `SupplementalConcept` records.
@@ -456,12 +403,7 @@ class IngesterDocumentSupplemental(IngesterDocumentBase):
 class IngesterDocumentDescriptor(IngesterDocumentBase):
     """Class to ingest a parsed XML `<DescriptorRecord>` document."""
 
-    def __init__(
-        self,
-        dal: DalMesh,
-        do_ingest_links: bool,
-        **kwargs
-    ):
+    def __init__(self, dal: DalMesh, do_ingest_links: bool, **kwargs):
         """Constructor and initialization.
 
         Args:
@@ -470,16 +412,11 @@ class IngesterDocumentDescriptor(IngesterDocumentBase):
         """
 
         super(IngesterDocumentDescriptor, self).__init__(
-            dal=dal,
-            do_ingest_links=do_ingest_links,
-            kwargs=kwargs,
+            dal=dal, do_ingest_links=do_ingest_links, kwargs=kwargs
         )
 
     @log_ingestion_of_document(document_name="DescriptorRecord")
-    def ingest(
-        self,
-        doc: dict,
-    ) -> Union[int, None]:
+    def ingest(self, doc: dict) -> Union[int, None]:
         """Ingests a parsed element of type `<DescriptorRecord>` and creates a
         `Descriptor` record.
 
@@ -527,9 +464,7 @@ class IngesterDocumentDescriptor(IngesterDocumentBase):
         for doc_previous_indexings in doc.get("PreviousIndexingList"):
             # Upsert the `PreviousIndexing` record.
             previous_indexing_id = self.dal.iodi_previous_indexing(
-                previous_indexing=doc_previous_indexings.get(
-                    "PreviousIndexing",
-                ),
+                previous_indexing=doc_previous_indexings.get("PreviousIndexing")
             )
             # Upsert the `DescriptorPreviousIndexing` record.
             self.dal.iodi_descriptor_previous_indexing(
@@ -546,8 +481,8 @@ class IngesterDocumentDescriptor(IngesterDocumentBase):
                     {
                         "ui": self._get_qref_ui(
                             doc_entry_combination.get("ECIN")
-                        ),
-                    }
+                        )
+                    },
                 )
                 # Upsert the ECIN `EntryCombination` record.
                 self.dal.iodu_entry_combination(
@@ -556,7 +491,7 @@ class IngesterDocumentDescriptor(IngesterDocumentBase):
                         {
                             "ui": self._get_dref_ui(
                                 doc_entry_combination.get("ECIN")
-                            ),
+                            )
                         },
                     ).descriptor_id,
                     qualifier_id=qualifier.qualifier_id if qualifier else None,
@@ -568,8 +503,8 @@ class IngesterDocumentDescriptor(IngesterDocumentBase):
                     {
                         "ui": self._get_qref_ui(
                             doc_entry_combination.get("ECOUT")
-                        ),
-                    }
+                        )
+                    },
                 )
                 # Upsert the ECOUT `EntryCombination` record.
                 self.dal.iodu_entry_combination(
@@ -578,8 +513,8 @@ class IngesterDocumentDescriptor(IngesterDocumentBase):
                         {
                             "ui": self._get_dref_ui(
                                 doc_entry_combination.get("ECOUT")
-                            ),
-                        }
+                            )
+                        },
                     ).descriptor_id,
                     qualifier_id=qualifier.qualifier_id if qualifier else None,
                     combination_type=EntryCombinationType.ECOUT,
@@ -616,8 +551,7 @@ class IngesterDocumentDescriptor(IngesterDocumentBase):
             tree_number_id = self.ingest_tree_number(doc_tree_number)
             # Upsert the `QualifierTreeNumber` record.
             self.dal.iodi_descriptor_tree_number(
-                descriptor_id=descriptor_id,
-                tree_number_id=tree_number_id
+                descriptor_id=descriptor_id, tree_number_id=tree_number_id
             )
 
         # Upsert the `Concept` and `DescriptorConcept` records.
@@ -639,11 +573,7 @@ class IngesterUmlsConso(object):
         MRCONSO.RRF through the `ParserUmlsConso` class and .
     """
 
-    def __init__(
-        self,
-        dal: DalMesh,
-        **kwargs
-    ):
+    def __init__(self, dal: DalMesh, **kwargs):
         """ Constructor and initialization.
 
         Args:
@@ -655,13 +585,10 @@ class IngesterUmlsConso(object):
 
         self.logger = create_logger(
             logger_name=type(self).__name__,
-            logger_level=kwargs.get("logger_level", "DEBUG")
+            logger_level=kwargs.get("logger_level", "DEBUG"),
         )
 
-    def ingest(
-        self,
-        document: Dict[str, List[str]]
-    ) -> None:
+    def ingest(self, document: Dict[str, List[str]]) -> None:
         """ The MRCONSO.RRF data dictionary parsed through the `ParserUmlsConso`
             class.
 
@@ -688,10 +615,9 @@ class IngesterUmlsConso(object):
             msg_fmt = msg.format(descriptor_ui)
             self.logger.info(msg_fmt)
 
+            # noinspection PyTypeChecker
             descriptor = self.dal.get_by_attr(
-                orm_class=Descriptor,
-                attr_name="ui",
-                attr_value=descriptor_ui,
+                orm_class=Descriptor, attr_name="ui", attr_value=descriptor_ui
             )  # type: Descriptor
 
             if not descriptor:
@@ -712,11 +638,7 @@ class IngesterUmlsDef(object):
         UMLS MRDEF.RRF through the `ParserUmlsDef` class.
     """
 
-    def __init__(
-        self,
-        dal: DalMesh,
-        **kwargs
-    ):
+    def __init__(self, dal: DalMesh, **kwargs):
         """ Constructor and initialization.
 
         Args:
@@ -728,13 +650,10 @@ class IngesterUmlsDef(object):
 
         self.logger = create_logger(
             logger_name=type(self).__name__,
-            logger_level=kwargs.get("logger_level", "DEBUG")
+            logger_level=kwargs.get("logger_level", "DEBUG"),
         )
 
-    def ingest(
-        self,
-        document: dict
-    ):
+    def ingest(self, document: dict):
         """ The MRDEF.RRF data dictionary parsed through the `ParserUmlsDef`
             class.
 
@@ -750,15 +669,13 @@ class IngesterUmlsDef(object):
         # Iterate over the definitions and ingest.
         for descriptor_ui, data in document.items():
 
-            msg = ("Ingesting definition for MeSH descriptor with "
-                   "UI '{}'")
+            msg = "Ingesting definition for MeSH descriptor with " "UI '{}'"
             msg_fmt = msg.format(descriptor_ui)
             self.logger.info(msg_fmt)
 
+            # noinspection PyTypeChecker
             descriptor = self.dal.get_by_attr(
-                orm_class=Descriptor,
-                attr_name="ui",
-                attr_value=descriptor_ui,
+                orm_class=Descriptor, attr_name="ui", attr_value=descriptor_ui
             )  # type: Descriptor
 
             if not descriptor:
@@ -769,7 +686,7 @@ class IngesterUmlsDef(object):
 
             for source, definitions in data.items():
                 source_member = DescriptorDefinitionSourceType.get_member(
-                    source,
+                    source
                 )
                 if not source_member:
                     continue

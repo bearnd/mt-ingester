@@ -3,9 +3,7 @@
 from typing import Union
 
 
-def convert_yn_boolean(
-    yn_boolean_raw: str
-) -> Union[bool, None]:
+def convert_yn_boolean(yn_boolean_raw: str) -> Union[bool, None]:
     """Converts a string with values of `Y` or `N` to the corresponding
     boolean.
 
