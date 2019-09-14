@@ -1,5 +1,9 @@
 ## Changelog
 
+### v0.6.0
+
+- Story CH1076: Update to Python 3.7.
+
 ### v0.5.2
 
 - Fixed issues in `ingest.sh`.

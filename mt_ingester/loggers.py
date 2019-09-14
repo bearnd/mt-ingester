@@ -16,12 +16,12 @@ import colorlog
 
 
 def create_logger(
-        logger_name,
-        logger_level="DEBUG",
-        project_name="mt-ingester",
-        do_log_stdout=True,
-        do_log_syslog=True,
-        do_color_logs=True,
+    logger_name,
+    logger_level="DEBUG",
+    project_name="mt-ingester",
+    do_log_stdout=True,
+    do_log_syslog=True,
+    do_color_logs=True,
 ):
     """ Creates and customizes a logger
 
@@ -70,8 +70,10 @@ def create_logger(
         return logger
 
     # Assemble the logging format.
-    fmt_tmpl = ("{0}: %(process)d %(processName)s %(asctime)-15s "
-                "%(levelname)-8s %(name)-10s %(funcName)s %(message)s")
+    fmt_tmpl = (
+        "{0}: %(process)d %(processName)s %(asctime)-15s "
+        "%(levelname)-8s %(name)-10s %(funcName)s %(message)s"
+    )
     fmt = fmt_tmpl.format(project_name)
 
     # Create a colourful formatter (should one be needed).
@@ -80,14 +82,14 @@ def create_logger(
         datefmt="%Y-%m-%dT%H:%M:%SZ",
         reset=True,
         log_colors={
-            'DEBUG': 'blue',
-            'INFO': 'green',
-            'WARNING': 'yellow',
-            'ERROR': 'red',
-            'CRITICAL': 'red,bg_white',
+            "DEBUG": "blue",
+            "INFO": "green",
+            "WARNING": "yellow",
+            "ERROR": "red",
+            "CRITICAL": "red,bg_white",
         },
         secondary_log_colors={},
-        style='%'
+        style="%",
     )
 
     # Create a formatter without colours.

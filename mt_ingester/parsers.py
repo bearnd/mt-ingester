@@ -28,7 +28,7 @@ class ParserBase(object):
 
         self.logger = create_logger(
             logger_name=type(self).__name__,
-            logger_level=kwargs.get("logger_level", "DEBUG")
+            logger_level=kwargs.get("logger_level", "DEBUG"),
         )
 
 
@@ -38,9 +38,7 @@ class ParserXmlBase(ParserBase):
         super(ParserXmlBase, self).__init__(kwargs=kwargs)
 
     @staticmethod
-    def _et(
-        element: etree.Element,
-    ) -> Union[str, None]:
+    def _et(element: etree.Element,) -> Union[str, None]:
         """Extracts the element text (ET)."""
 
         text = None
@@ -71,16 +69,14 @@ class ParserXmlBase(ParserBase):
     def generate_xml_elements(file_xml, element_tag=None):
 
         document = etree.iterparse(
-            file_xml,
-            events=("start", "end"),
-            tag=element_tag
+            file_xml, events=("start", "end"), tag=element_tag
         )
 
         start_tag = None
         for event, element in document:
-            if event == 'start' and start_tag is None:
+            if event == "start" and start_tag is None:
                 start_tag = element.tag
-            if event == 'end' and element.tag == start_tag:
+            if event == "end" and element.tag == start_tag:
                 yield element
                 start_tag = None
                 element.clear()
@@ -107,10 +103,7 @@ class ParserXmlMeshBase(ParserXmlBase):
 
         super(ParserXmlMeshBase, self).__init__(kwargs=kwargs)
 
-    def _ets(
-        self,
-        element: etree.Element,
-    ) -> Union[str, None]:
+    def _ets(self, element: etree.Element) -> Union[str, None]:
         """Extracts the text out of an element containing an element of
         `<String>` type.
 
@@ -137,10 +130,7 @@ class ParserXmlMeshBase(ParserXmlBase):
 
         return str_value
 
-    def _ed(
-        self,
-        element: etree.Element,
-    ) -> Union[datetime.date, None]:
+    def _ed(self, element: etree.Element) -> Union[datetime.date, None]:
         """Parses a date-element containing elements of type `<Year>`,
         `<Month>`, and `<Day>` and and returns a `datetime.date` object
         representing that date.
@@ -159,11 +149,7 @@ class ParserXmlMeshBase(ParserXmlBase):
         element_month = element.find("Month")
         element_day = element.find("Day")
 
-        if (
-            element_year is None or
-            element_month is None or
-            element_day is None
-        ):
+        if element_year is None or element_month is None or element_day is None:
             return None
 
         year = self._et(element_year)
@@ -171,9 +157,9 @@ class ParserXmlMeshBase(ParserXmlBase):
         day = self._et(element_day)
 
         if not (
-            (year and year.isdigit()) and
-            (month and month.isdigit()) and
-            (day and day.isdigit())
+            (year and year.isdigit())
+            and (month and month.isdigit())
+            and (day and day.isdigit())
         ):
             return None
 
@@ -181,10 +167,7 @@ class ParserXmlMeshBase(ParserXmlBase):
 
         return dt
 
-    def parse_tree_number(
-        self,
-        element: etree.Element,
-    ) -> dict:
+    def parse_tree_number(self, element: etree.Element) -> dict:
         """Parses an element of type `<TreeNumber>` and returns the
         values of the contained elements.
 
@@ -198,16 +181,11 @@ class ParserXmlMeshBase(ParserXmlBase):
         if element is None:
             return {}
 
-        tree_number = {
-            "TreeNumber": self._et(element),
-        }
+        tree_number = {"TreeNumber": self._et(element)}
 
         return tree_number
 
-    def parse_tree_number_list(
-        self,
-        element: etree.Element,
-    ) -> list:
+    def parse_tree_number_list(self, element: etree.Element) -> list:
         """Extracts and parses elements of type `<TreeNumber>` from
         a `<TreeNumberList>` element and returns the values of the
         contained elements.
@@ -226,16 +204,11 @@ class ParserXmlMeshBase(ParserXmlBase):
             return []
 
         for _element in element.findall("TreeNumber"):
-            tree_numbers.append(
-                self.parse_tree_number(_element)
-            )
+            tree_numbers.append(self.parse_tree_number(_element))
 
         return tree_numbers
 
-    def parse_related_registry_number(
-        self,
-        element: etree.Element,
-    ) -> dict:
+    def parse_related_registry_number(self, element: etree.Element) -> dict:
         """Parses an element of type `<RelatedRegistryNumber>` and returns the
         values of the contained elements.
 
@@ -250,15 +223,12 @@ class ParserXmlMeshBase(ParserXmlBase):
         if element is None:
             return {}
 
-        related_registry_number = {
-            "RelatedRegistryNumber": self._et(element),
-        }
+        related_registry_number = {"RelatedRegistryNumber": self._et(element)}
 
         return related_registry_number
 
     def parse_related_registry_number_list(
-        self,
-        element: etree.Element,
+        self, element: etree.Element
     ) -> list:
         """Extracts and parses elements of type `<RelatedRegistryNumber>` from a
         `<RelatedRegistryNumberList>` element and returns the values of the
@@ -284,10 +254,7 @@ class ParserXmlMeshBase(ParserXmlBase):
 
         return related_registry_numbers
 
-    def parse_concept_relation(
-        self,
-        element: etree.Element,
-    ) -> dict:
+    def parse_concept_relation(self, element: etree.Element) -> dict:
         """Parses an element of type `<ConceptRelation>` and returns the values
         of the contained elements.
 
@@ -303,7 +270,7 @@ class ParserXmlMeshBase(ParserXmlBase):
 
         concept_relation = {
             "RelationName": RelationNameType.get_member(
-                self._eav(element, "RelationName"),
+                self._eav(element, "RelationName")
             ),
             "Concept1UI": self._et(element.find("Concept1UI")),
             "Concept2UI": self._et(element.find("Concept2UI")),
@@ -311,10 +278,7 @@ class ParserXmlMeshBase(ParserXmlBase):
 
         return concept_relation
 
-    def parse_concept_relation_list(
-        self,
-        element: etree.Element,
-    ) -> list:
+    def parse_concept_relation_list(self, element: etree.Element) -> list:
         """Extracts and parses elements of type `<ConceptRelation>` from a
         `<ConceptRelationList>` element and returns the values of the
         contained elements.
@@ -333,16 +297,11 @@ class ParserXmlMeshBase(ParserXmlBase):
             return []
 
         for _element in element.findall("ConceptRelation"):
-            concept_relations.append(
-                self.parse_concept_relation(_element)
-            )
+            concept_relations.append(self.parse_concept_relation(_element))
 
         return concept_relations
 
-    def parse_thesaurus_id(
-        self,
-        element: etree.Element,
-    ) -> dict:
+    def parse_thesaurus_id(self, element: etree.Element) -> dict:
         """Parses an element of type `<ThesaurusID>` and returns the values of
         the contained elements.
 
@@ -356,16 +315,11 @@ class ParserXmlMeshBase(ParserXmlBase):
         if element is None:
             return {}
 
-        thesaurus_id = {
-            "ThesaurusID": self._et(element),
-        }
+        thesaurus_id = {"ThesaurusID": self._et(element)}
 
         return thesaurus_id
 
-    def parse_thesaurus_id_list(
-        self,
-        element: etree.Element,
-    ) -> list:
+    def parse_thesaurus_id_list(self, element: etree.Element) -> list:
         """Extracts and parses elements of type `<ThesaurusID>` from a
         `<ThesaurusIDlist>` element and returns the values of the
         contained elements.
@@ -383,16 +337,11 @@ class ParserXmlMeshBase(ParserXmlBase):
             return []
 
         for _element in element.findall("ThesaurusID"):
-            thesaurus_ids.append(
-                self.parse_thesaurus_id(_element)
-            )
+            thesaurus_ids.append(self.parse_thesaurus_id(_element))
 
         return thesaurus_ids
 
-    def parse_term(
-        self,
-        element: etree.Element,
-    ) -> dict:
+    def parse_term(self, element: etree.Element) -> dict:
         """Parses an element of type `<Term>` and returns the values of the
         contained elements.
 
@@ -408,19 +357,14 @@ class ParserXmlMeshBase(ParserXmlBase):
 
         term = {
             "ConceptPreferredTermYN": self._eav(
-                element,
-                "ConceptPreferredTermYN",
+                element, "ConceptPreferredTermYN"
             ),
-            "IsPermutedTermYN": self._eav(
-                element,
-                "IsPermutedTermYN",
-            ),
+            "IsPermutedTermYN": self._eav(element, "IsPermutedTermYN"),
             "LexicalTag": LexicalTagType.get_member(
-                self._eav(element, "LexicalTag"),
+                self._eav(element, "LexicalTag")
             ),
             "RecordPreferredTermYN": self._eav(
-                element,
-                "RecordPreferredTermYN",
+                element, "RecordPreferredTermYN"
             ),
             "TermUI": self._et(element.find("TermUI")),
             "String": self._et(element.find("String")),
@@ -429,27 +373,24 @@ class ParserXmlMeshBase(ParserXmlBase):
             "SortVersion": self._et(element.find("SortVersion")),
             "EntryVersion": self._et(element.find("EntryVersion")),
             "ThesaurusIDlist": self.parse_thesaurus_id_list(
-                element.find("ThesaurusIDlist"),
+                element.find("ThesaurusIDlist")
             ),
             "TermNote": self._et(element.find("TermNote")),
         }
 
         term["ConceptPreferredTermYN"] = convert_yn_boolean(
-            term["ConceptPreferredTermYN"],
+            term["ConceptPreferredTermYN"]
         )
 
         term["IsPermutedTermYN"] = convert_yn_boolean(term["IsPermutedTermYN"])
 
         term["RecordPreferredTermYN"] = convert_yn_boolean(
-            term["RecordPreferredTermYN"],
+            term["RecordPreferredTermYN"]
         )
 
         return term
 
-    def parse_term_list(
-        self,
-        element: etree.Element,
-    ) -> list:
+    def parse_term_list(self, element: etree.Element) -> list:
         """Extracts and parses elements of type `<Term>` from a `<TermList>`
         element and returns the values of the contained elements.
 
@@ -470,10 +411,7 @@ class ParserXmlMeshBase(ParserXmlBase):
 
         return terms
 
-    def parse_concept(
-        self,
-        element: etree.Element,
-    ) -> dict:
+    def parse_concept(self, element: etree.Element) -> dict:
         """Parses an element of type `<Concept>` and returns the values of the
         contained elements.
 
@@ -487,6 +425,7 @@ class ParserXmlMeshBase(ParserXmlBase):
         if element is None:
             return {}
 
+        # noinspection LongLine
         concept = {
             "PreferredConceptYN": self._eav(element, "PreferredConceptYN"),
             "ConceptUI": self._et(element.find("ConceptUI")),
@@ -495,31 +434,27 @@ class ParserXmlMeshBase(ParserXmlBase):
             "RegistryNumber": self._et(element.find("RegistryNumber")),
             "ScopeNote": self._et(element.find("ScopeNote")),
             "TranslatorsEnglishScopeNote": self._et(
-                element.find("TranslatorsEnglishScopeNote"),
+                element.find("TranslatorsEnglishScopeNote")
             ),
             "TranslatorsScopeNote": self._et(
-                element.find("TranslatorsScopeNote"),
+                element.find("TranslatorsScopeNote")
             ),
-            "RelatedRegistryNumberList":
-                self.parse_related_registry_number_list(
-                element.find("RelatedRegistryNumberList"),
+            "RelatedRegistryNumberList": self.parse_related_registry_number_list(
+                element.find("RelatedRegistryNumberList")
             ),
             "ConceptRelationList": self.parse_concept_relation_list(
-                element.find("ConceptRelationList"),
+                element.find("ConceptRelationList")
             ),
             "TermList": self.parse_term_list(element.find("TermList")),
         }
 
         concept["PreferredConceptYN"] = convert_yn_boolean(
-            concept["PreferredConceptYN"],
+            concept["PreferredConceptYN"]
         )
 
         return concept
 
-    def parse_concept_list(
-        self,
-        element: etree.Element,
-    ) -> list:
+    def parse_concept_list(self, element: etree.Element) -> list:
         """Extracts and parses elements of type `<Concept>` from a
         `<ConceptList>` element and returns the values of the contained
         elements.
@@ -537,16 +472,11 @@ class ParserXmlMeshBase(ParserXmlBase):
             return []
 
         for _element in element.findall("Concept"):
-            concepts.append(
-                self.parse_concept(_element)
-            )
+            concepts.append(self.parse_concept(_element))
 
         return concepts
 
-    def parse_previous_indexing(
-        self,
-        element: etree.Element,
-    ) -> dict:
+    def parse_previous_indexing(self, element: etree.Element) -> dict:
         """Parses an element of type `<PreviousIndexing>` and returns the
         values of the contained elements.
 
@@ -560,16 +490,11 @@ class ParserXmlMeshBase(ParserXmlBase):
         if element is None:
             return {}
 
-        previous_indexing = {
-            "PreviousIndexing": self._et(element),
-        }
+        previous_indexing = {"PreviousIndexing": self._et(element)}
 
         return previous_indexing
 
-    def parse_previous_indexing_list(
-        self,
-        element: etree.Element,
-    ) -> list:
+    def parse_previous_indexing_list(self, element: etree.Element) -> list:
         """Extracts and parses elements of type `<PreviousIndexing>` from
         a `<PreviousIndexingList>` element and returns the values of the
         contained elements.
@@ -588,16 +513,11 @@ class ParserXmlMeshBase(ParserXmlBase):
             return []
 
         for _element in element.findall("PreviousIndexing"):
-            previous_indexing.append(
-                self.parse_previous_indexing(_element)
-            )
+            previous_indexing.append(self.parse_previous_indexing(_element))
 
         return previous_indexing
 
-    def parse_descriptor_reference(
-        self,
-        element: etree.Element,
-    ) -> dict:
+    def parse_descriptor_reference(self, element: etree.Element) -> dict:
         """Parses an element of base-type `<DescriptorReference>` and returns
         the values of the contained elements.
 
@@ -628,10 +548,7 @@ class ParserXmlMeshBase(ParserXmlBase):
 
         return descriptor_reference
 
-    def parse_qualifier_reference(
-        self,
-        element: etree.Element,
-    ) -> dict:
+    def parse_qualifier_reference(self, element: etree.Element) -> dict:
         """Parses an element of base-type `<QualifierReference>` and returns
         the values of the contained elements.
 
@@ -662,10 +579,7 @@ class ParserXmlMeshBase(ParserXmlBase):
 
         return qualifier_reference
 
-    def parse_pharmacological_action(
-        self,
-        element: etree.Element,
-    ) -> dict:
+    def parse_pharmacological_action(self, element: etree.Element) -> dict:
         """Parses an element of type `<PharmacologicalAction>` and returns the
         values of the contained elements.
 
@@ -683,15 +597,12 @@ class ParserXmlMeshBase(ParserXmlBase):
         pharmacological_action = {
             "DescriptorReferredTo": self.parse_descriptor_reference(
                 element.find("DescriptorReferredTo")
-            ),
+            )
         }
 
         return pharmacological_action
 
-    def parse_pharmacological_action_list(
-        self,
-        element: etree.Element,
-    ) -> list:
+    def parse_pharmacological_action_list(self, element: etree.Element) -> list:
         """Extracts and parses elements of type `<PharmacologicalAction>` from
         a `<PharmacologicalActionList>` element and returns the values of the
         contained elements.
@@ -726,10 +637,7 @@ class ParserXmlMeshDescriptors(ParserXmlMeshBase):
 
         super(ParserXmlMeshDescriptors, self).__init__(kwargs=kwargs)
 
-    def parse_allowable_qualifier(
-        self,
-        element: etree.Element,
-    ) -> dict:
+    def parse_allowable_qualifier(self, element: etree.Element) -> dict:
         """Parses an element of type `<AllowableQualifier>` and returns the
         values of the contained elements.
 
@@ -752,10 +660,7 @@ class ParserXmlMeshDescriptors(ParserXmlMeshBase):
 
         return allowable_qualifier
 
-    def parse_allowable_qualifiers_list(
-        self,
-        element: etree.Element,
-    ) -> list:
+    def parse_allowable_qualifiers_list(self, element: etree.Element) -> list:
         """Extracts and parses elements of type `<AllowableQualifier>` from
         a `<AllowableQualifiersList>` element and returns the values of the
         contained elements.
@@ -780,10 +685,7 @@ class ParserXmlMeshDescriptors(ParserXmlMeshBase):
 
         return allowable_qualifiers
 
-    def parse_entry_combination(
-        self,
-        element: etree.Element,
-    ) -> dict:
+    def parse_entry_combination(self, element: etree.Element) -> dict:
         """Parses an element of type `<EntryCombination>` and returns the values
         of the contained elements.
 
@@ -803,28 +705,25 @@ class ParserXmlMeshDescriptors(ParserXmlMeshBase):
         entry_combination = {
             "ECIN": {
                 "DescriptorReferredTo": self.parse_descriptor_reference(
-                    element_ecin.find("DescriptorReferredTo"),
+                    element_ecin.find("DescriptorReferredTo")
                 ),
                 "QualifierReferredTo": self.parse_qualifier_reference(
-                    element_ecin.find("QualifierReferredTo"),
+                    element_ecin.find("QualifierReferredTo")
                 ),
             },
             "ECOUT": {
                 "DescriptorReferredTo": self.parse_descriptor_reference(
-                    element_ecout.find("DescriptorReferredTo"),
+                    element_ecout.find("DescriptorReferredTo")
                 ),
                 "QualifierReferredTo": self.parse_qualifier_reference(
-                    element_ecout.find("QualifierReferredTo"),
+                    element_ecout.find("QualifierReferredTo")
                 ),
             },
         }
 
         return entry_combination
 
-    def parse_entry_combination_list(
-        self,
-        element: etree.Element,
-    ) -> list:
+    def parse_entry_combination_list(self, element: etree.Element) -> list:
         """Extracts and parses elements of type `<EntryCombination>` from a
         `<EntryCombinationList>` element and returns the values of the
         contained elements.
@@ -843,16 +742,11 @@ class ParserXmlMeshDescriptors(ParserXmlMeshBase):
             return []
 
         for _element in element.findall("EntryCombination"):
-            entry_combinations.append(
-                self.parse_entry_combination(_element)
-            )
+            entry_combinations.append(self.parse_entry_combination(_element))
 
         return entry_combinations
 
-    def parse_see_related_descriptor(
-        self,
-        element: etree.Element,
-    ) -> dict:
+    def parse_see_related_descriptor(self, element: etree.Element) -> dict:
         """Parses an element of type `<SeeRelatedDescriptor>` and returns the
         values of the contained elements.
 
@@ -869,16 +763,13 @@ class ParserXmlMeshDescriptors(ParserXmlMeshBase):
 
         see_related_descriptor = {
             "DescriptorReferredTo": self.parse_descriptor_reference(
-                element.find("DescriptorReferredTo"),
+                element.find("DescriptorReferredTo")
             )
         }
 
         return see_related_descriptor
 
-    def parse_see_related_list(
-        self,
-        element: etree.Element,
-    ) -> list:
+    def parse_see_related_list(self, element: etree.Element) -> list:
         """Extracts and parses elements of type `<SeeRelatedDescriptor>` from a
         `<SeeRelatedList>` element and returns the values of the contained
         elements.
@@ -896,16 +787,11 @@ class ParserXmlMeshDescriptors(ParserXmlMeshBase):
             return []
 
         for _element in element.findall("SeeRelatedDescriptor"):
-            see_relateds.append(
-                self.parse_see_related_descriptor(_element)
-            )
+            see_relateds.append(self.parse_see_related_descriptor(_element))
 
         return see_relateds
 
-    def parse_descriptor_record(
-        self,
-        element: etree.Element,
-    ) -> dict:
+    def parse_descriptor_record(self, element: etree.Element) -> dict:
         """Parses an element of type `<DescriptorRecord>` and returns the values
         of the contained elements.
 
@@ -921,7 +807,7 @@ class ParserXmlMeshDescriptors(ParserXmlMeshBase):
 
         descriptor_record = {
             "DescriptorClass": DescriptorClassType.get_member(
-                self._eav(element, "DescriptorClass"),
+                self._eav(element, "DescriptorClass")
             ),
             "DescriptorUI": self._et(element.find("DescriptorUI")),
             "DescriptorName": self._ets(element.find("DescriptorName")),
@@ -929,27 +815,27 @@ class ParserXmlMeshDescriptors(ParserXmlMeshBase):
             "DateRevised": self._ed(element.find("DateRevised")),
             "DateEstablished": self._ed(element.find("DateEstablished")),
             "AllowableQualifiersList": self.parse_allowable_qualifiers_list(
-                element.find("AllowableQualifiersList", )
+                element.find("AllowableQualifiersList")
             ),
             "Annotation": self._et(element.find("Annotation")),
             "HistoryNote": self._et(element.find("HistoryNote")),
             "NLMClassificationNumber": self._et(
-                element.find("NLMClassificationNumber"),
+                element.find("NLMClassificationNumber")
             ),
             "OnlineNote": self._et(element.find("OnlineNote")),
             "PublicMeSHNote": self._et(element.find("PublicMeSHNote")),
             "PreviousIndexingList": self.parse_previous_indexing_list(
-                element.find("PreviousIndexingList"),
+                element.find("PreviousIndexingList")
             ),
             "EntryCombinationList": self.parse_entry_combination_list(
-                element.find("EntryCombinationList"),
+                element.find("EntryCombinationList")
             ),
             "SeeRelatedList": self.parse_see_related_list(
-                element.find("SeeRelatedList"),
+                element.find("SeeRelatedList")
             ),
             "ConsiderAlso": self._et(element.find("ConsiderAlso")),
             "PharmacologicalActionList": self.parse_pharmacological_action_list(
-                element.find("PharmacologicalActionList"),
+                element.find("PharmacologicalActionList")
             ),
             "TreeNumberList": self.parse_tree_number_list(
                 element.find("TreeNumberList")
@@ -968,8 +854,7 @@ class ParserXmlMeshDescriptors(ParserXmlMeshBase):
         file_xml = self.open_xml_file(filename_xml=filename_xml)
 
         elements = self.generate_xml_elements(
-            file_xml=file_xml,
-            element_tag="DescriptorRecord"
+            file_xml=file_xml, element_tag="DescriptorRecord"
         )
 
         for element in elements:
@@ -989,10 +874,7 @@ class ParserXmlMeshQualifiers(ParserXmlMeshBase):
 
         super(ParserXmlMeshQualifiers, self).__init__(kwargs=kwargs)
 
-    def parse_qualifier_record(
-        self,
-        element: etree.Element,
-    ) -> dict:
+    def parse_qualifier_record(self, element: etree.Element) -> dict:
         """Parses an element of type `<QualifierRecord>` and returns the values
         of the contained elements.
 
@@ -1032,8 +914,7 @@ class ParserXmlMeshQualifiers(ParserXmlMeshBase):
         file_xml = self.open_xml_file(filename_xml=filename_xml)
 
         elements = self.generate_xml_elements(
-            file_xml=file_xml,
-            element_tag="QualifierRecord"
+            file_xml=file_xml, element_tag="QualifierRecord"
         )
 
         for element in elements:
@@ -1053,10 +934,7 @@ class ParserXmlMeshSupplementals(ParserXmlMeshBase):
 
         super(ParserXmlMeshSupplementals, self).__init__(kwargs=kwargs)
 
-    def parse_heading_mapped_to(
-        self,
-        element: etree.Element,
-    ) -> dict:
+    def parse_heading_mapped_to(self, element: etree.Element) -> dict:
         """Parses an element of type `<HeadingMappedTo>` and returns the values
         of the contained elements.
 
@@ -1072,19 +950,16 @@ class ParserXmlMeshSupplementals(ParserXmlMeshBase):
 
         heading_mapped_to = {
             "DescriptorReferredTo": self.parse_descriptor_reference(
-                element.find("DescriptorReferredTo"),
+                element.find("DescriptorReferredTo")
             ),
             "QualifierReferredTo": self.parse_qualifier_reference(
-                element.find("QualifierReferredTo"),
+                element.find("QualifierReferredTo")
             ),
         }
 
         return heading_mapped_to
 
-    def parse_heading_mapped_to_list(
-        self,
-        element: etree.Element,
-    ) -> list:
+    def parse_heading_mapped_to_list(self, element: etree.Element) -> list:
         """Extracts and parses elements of type `<HeadingMappedTo>` from a
         `<HeadingMappedToList>` element and returns the values of the contained
         elements.
@@ -1103,16 +978,11 @@ class ParserXmlMeshSupplementals(ParserXmlMeshBase):
             return []
 
         for _element in element.findall("HeadingMappedTo"):
-            heading_mapped_tos.append(
-                self.parse_heading_mapped_to(_element)
-            )
+            heading_mapped_tos.append(self.parse_heading_mapped_to(_element))
 
         return heading_mapped_tos
 
-    def parse_indexing_information(
-        self,
-        element: etree.Element,
-    ) -> dict:
+    def parse_indexing_information(self, element: etree.Element) -> dict:
         """Parses an element of type `<IndexingInformation>` and returns the
         values of the contained elements.
 
@@ -1129,19 +999,16 @@ class ParserXmlMeshSupplementals(ParserXmlMeshBase):
 
         indexing_information = {
             "DescriptorReferredTo": self.parse_descriptor_reference(
-                element.find("DescriptorReferredTo"),
+                element.find("DescriptorReferredTo")
             ),
             "QualifierReferredTo": self.parse_qualifier_reference(
-                element.find("QualifierReferredTo"),
+                element.find("QualifierReferredTo")
             ),
         }
 
         return indexing_information
 
-    def parse_indexing_information_list(
-        self,
-        element: etree.Element,
-    ) -> list:
+    def parse_indexing_information_list(self, element: etree.Element) -> list:
         """Extracts and parses elements of type `<IndexingInformation>` from a
         `<IndexingInformationList>` element and returns the values of the
         contained elements.
@@ -1166,10 +1033,7 @@ class ParserXmlMeshSupplementals(ParserXmlMeshBase):
 
         return indexing_informations
 
-    def parse_source(
-        self,
-        element: etree.Element,
-    ) -> dict:
+    def parse_source(self, element: etree.Element) -> dict:
         """Parses an element of type `<Source>` and returns the values of the
         contained elements.
 
@@ -1183,16 +1047,11 @@ class ParserXmlMeshSupplementals(ParserXmlMeshBase):
         if element is None:
             return {}
 
-        source = {
-            "Source": self._et(element),
-        }
+        source = {"Source": self._et(element)}
 
         return source
 
-    def parse_source_list(
-        self,
-        element: etree.Element,
-    ) -> list:
+    def parse_source_list(self, element: etree.Element) -> list:
         """Extracts and parses elements of type `<Source>` from a `<SourceList>`
         element and returns the values of the contained elements.
 
@@ -1213,10 +1072,7 @@ class ParserXmlMeshSupplementals(ParserXmlMeshBase):
 
         return sources
 
-    def parse_supplemental_record(
-        self,
-        element: etree.Element,
-    ) -> dict:
+    def parse_supplemental_record(self, element: etree.Element) -> dict:
         """Parses an element of type `<SupplementalRecord>` and returns the
         values of the contained elements.
 
@@ -1232,29 +1088,29 @@ class ParserXmlMeshSupplementals(ParserXmlMeshBase):
 
         supplemental_record = {
             "SupplementalClass": SupplementalClassType.get_member(
-                self._eav(element, "SCRClass"),
+                self._eav(element, "SCRClass")
             ),
             "SupplementalRecordUI": self._et(
-                element.find("SupplementalRecordUI"),
+                element.find("SupplementalRecordUI")
             ),
             "SupplementalRecordName": self._ets(
-                element.find("SupplementalRecordName"),
+                element.find("SupplementalRecordName")
             ),
             "DateCreated": self._ed(element.find("DateCreated")),
             "DateRevised": self._ed(element.find("DateRevised")),
             "Note": self._et(element.find("Note")),
             "Frequency": self._et(element.find("Frequency")),
             "PreviousIndexingList": self.parse_previous_indexing_list(
-                element.find("PreviousIndexingList"),
+                element.find("PreviousIndexingList")
             ),
             "HeadingMappedToList": self.parse_heading_mapped_to_list(
-                element.find("HeadingMappedToList"),
+                element.find("HeadingMappedToList")
             ),
             "IndexingInformationList": self.parse_indexing_information_list(
-                element.find("IndexingInformationList"),
+                element.find("IndexingInformationList")
             ),
             "PharmacologicalActionList": self.parse_pharmacological_action_list(
-                element.find("PharmacologicalActionList"),
+                element.find("PharmacologicalActionList")
             ),
             "SourceList": self.parse_source_list(element.find("SourceList")),
             "ConceptList": self.parse_concept_list(element.find("ConceptList")),
@@ -1271,8 +1127,7 @@ class ParserXmlMeshSupplementals(ParserXmlMeshBase):
         file_xml = self.open_xml_file(filename_xml=filename_xml)
 
         elements = self.generate_xml_elements(
-            file_xml=file_xml,
-            element_tag="SupplementalRecord"
+            file_xml=file_xml, element_tag="SupplementalRecord"
         )
 
         for element in elements:
@@ -1311,17 +1166,11 @@ class ParserUmlsSat(ParserBase):
         "CVF",
     ]
 
-    def __init__(
-        self,
-        **kwargs: dict
-    ):
+    def __init__(self, **kwargs: dict):
         """ Constructor and initialization."""
         super(ParserUmlsSat, self).__init__(kwargs=kwargs)
 
-    def parse(
-        self,
-        filename_mrsat_rrf: str,
-    ) -> Dict[str, str]:
+    def parse(self, filename_mrsat_rrf: str) -> Dict[str, str]:
         """ Parses the MRSAT.rrf file and creates a dictionary keyed on UMLS
             CUIs with values of MeSH descriptor IDs.
 
@@ -1342,9 +1191,7 @@ class ParserUmlsSat(ParserBase):
         map_cui_dui = {}
         with open(filename_mrsat_rrf, "r") as finp:
             reader = csv.DictReader(
-                finp,
-                fieldnames=self.fieldnames_mrsat,
-                delimiter="|",
+                finp, fieldnames=self.fieldnames_mrsat, delimiter="|"
             )
 
             for entry in reader:
@@ -1362,17 +1209,11 @@ class ParserUmlsSat(ParserBase):
 
                 # Retrieve the MeSH DUI depending on the value of `ATN`.
                 if entry["ATN"] == "TERMUI":
-                    if (
-                        not entry["CODE"] or
-                        not entry["CODE"].startswith("D")
-                    ):
+                    if not entry["CODE"] or not entry["CODE"].startswith("D"):
                         continue
                     dui = entry["CODE"]
                 elif entry["ATN"] == "MESH_DUI":
-                    if (
-                        not entry["ATV"] or
-                        not entry["ATV"].startswith("D")
-                    ):
+                    if not entry["ATV"] or not entry["ATV"].startswith("D"):
                         continue
                     dui = entry["ATV"]
                 else:
@@ -1416,18 +1257,13 @@ class ParserUmlsConso(ParserBase):
         "CVF",
     ]
 
-    def __init__(
-        self,
-        **kwargs: dict
-    ):
+    def __init__(self, **kwargs: dict):
         """ Constructor and initialization."""
 
         super(ParserUmlsConso, self).__init__(kwargs=kwargs)
 
     def parse(
-        self,
-        filename_mrsat_rrf: str,
-        filename_mrconso_rrf: str,
+        self, filename_mrsat_rrf: str, filename_mrconso_rrf: str
     ) -> Dict[str, List[str]]:
         """ Parses the MRSAT.rrf and MRCONSO.rrf files and creates a dictionary
             keyed on MeSH descriptor IDs with values of lists of synonyms.
@@ -1453,9 +1289,7 @@ class ParserUmlsConso(ParserBase):
         dui_synonyms = {}
         with open(filename_mrconso_rrf, "r") as finp:
             reader = csv.DictReader(
-                finp,
-                fieldnames=self.fieldnames_mrconso,
-                delimiter="|",
+                finp, fieldnames=self.fieldnames_mrconso, delimiter="|"
             )
 
             for entry in reader:
@@ -1508,10 +1342,7 @@ class ParserUmlsDef(ParserBase):
         "CVF",
     ]
 
-    def __init__(
-        self,
-        **kwargs: dict
-    ):
+    def __init__(self, **kwargs: dict):
         """ Constructor and initialization."""
 
         super(ParserUmlsDef, self).__init__(kwargs=kwargs)
@@ -1561,9 +1392,7 @@ class ParserUmlsDef(ParserBase):
         dui_definitions = {}
         with open(filename_mrdef_rrf, "r") as finp:
             reader = csv.DictReader(
-                finp,
-                fieldnames=self.fieldnames_mrdef,
-                delimiter="|",
+                finp, fieldnames=self.fieldnames_mrdef, delimiter="|"
             )
 
             for entry in reader:
@@ -1595,8 +1424,7 @@ class ParserUmlsDef(ParserBase):
                 # Retrieve the list of definitions for this MeSH descriptor and
                 # definition source.
                 definitions = dui_definitions.setdefault(
-                    map_cui_dui[entry["CUI"]],
-                    {},
+                    map_cui_dui[entry["CUI"]], {}
                 ).setdefault(entry["SAB"], [])
 
                 # Add the new definition if it doesn't already exist in the

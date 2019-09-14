@@ -50,20 +50,17 @@ def main(args):
     if arguments.mode == "descriptors":
         parser = ParserXmlMeshDescriptors()
         ingester = IngesterDocumentDescriptor(
-            dal=dal,
-            do_ingest_links=arguments.do_ingest_links,
+            dal=dal, do_ingest_links=arguments.do_ingest_links
         )
     elif arguments.mode == "qualifiers":
         parser = ParserXmlMeshQualifiers()
         ingester = IngesterDocumentQualifier(
-            dal=dal,
-            do_ingest_links=arguments.do_ingest_links,
+            dal=dal, do_ingest_links=arguments.do_ingest_links
         )
     elif arguments.mode == "supplementals":
         parser = ParserXmlMeshSupplementals()
         ingester = IngesterDocumentSupplemental(
-            dal=dal,
-            do_ingest_links=arguments.do_ingest_links,
+            dal=dal, do_ingest_links=arguments.do_ingest_links
         )
     elif arguments.mode == "synonyms":
         parser = ParserUmlsConso()
@@ -89,9 +86,7 @@ if __name__ == "__main__":
         description="mt-ingester: MeSH XML dump parser and SQL ingester."
     )
     argument_parser.add_argument(
-        "filenames",
-        nargs="+",
-        help="MeSH XML files to ingest.",
+        "filenames", nargs="+", help="MeSH XML files to ingest."
     )
     argument_parser.add_argument(
         "--mode",
@@ -107,14 +102,10 @@ if __name__ == "__main__":
         required=True,
     )
     argument_parser.add_argument(
-        "--do-ingest-links",
-        dest="do_ingest_links",
-        action="store_true",
+        "--do-ingest-links", dest="do_ingest_links", action="store_true"
     )
     argument_parser.add_argument(
-        "--no-do-ingest-links",
-        dest="do_ingest_links",
-        action="store_false",
+        "--no-do-ingest-links", dest="do_ingest_links", action="store_false"
     )
     argument_parser.add_argument(
         "--config-file",
