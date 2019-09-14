@@ -1,5 +1,10 @@
 ## Changelog
 
+### v0.7.0
+
+- Story CH1086: Switch `mt-ingester` Git deployment to GitLab.com.
+- Updated Python requirements to install `fightfor-orm` from gitlab.com.
+
 ### v0.6.0
 
 - Story CH1076: Update to Python 3.7.
