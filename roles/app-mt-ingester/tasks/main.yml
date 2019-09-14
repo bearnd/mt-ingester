@@ -151,7 +151,7 @@
 
 - name: Checkout the project source code from Git (Production)
   git:
-    repo: "ssh://git@sunny.diskstation.me/bearnd/mt-ingester.git"
+    repo: "https://{{ gitlab_deploy_token_username }}:{{ gitlab_deploy_token_password }}@gitlab.com/bearnd/mt-ingester.git"
     dest: "{{ system.directories.share }}/src"
     depth: 1
     force: yes
