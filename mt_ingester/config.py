@@ -27,38 +27,37 @@ config_schema_default = {
         # General Settings.
         "logger_level",
         # SQL Server Configuration Settings.
-        "sql_host", "sql_port", "sql_username", "sql_password", "sql_db"
+        "sql_host",
+        "sql_port",
+        "sql_username",
+        "sql_password",
+        "sql_db",
     ],
     "properties": {
         "logger_level": {
             "type": "string",
-            "description": ("The minimum level of `logging` messages that will "
-                            "be emitted"),
-            "enum": [
-                "DEBUG",
-                "INFO",
-                "WARNING",
-                "ERROR",
-                "CRITICAL"
-            ]
+            "description": (
+                "The minimum level of `logging` messages that will "
+                "be emitted"
+            ),
+            "enum": ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
         },
         # SQL Server Configuration Settings.
-        "sql_host": {
-            "type": "string", "description": "SQL server host."
-        },
-        "sql_port": {
-            "type": "integer", "description": "SQL server port."
-        },
+        "sql_host": {"type": "string", "description": "SQL server host."},
+        "sql_port": {"type": "integer", "description": "SQL server port."},
         "sql_username": {
-            "type": "string", "description": "SQL server username."
+            "type": "string",
+            "description": "SQL server username.",
         },
         "sql_password": {
-            "type": "string", "description": "SQL server password."
+            "type": "string",
+            "description": "SQL server password.",
         },
         "sql_db": {
-            "type": "string", "description": "SQL server database name."
+            "type": "string",
+            "description": "SQL server database name.",
         },
-    }
+    },
 }
 
 
@@ -74,9 +73,8 @@ def load_config_file(fname_config_file):
     """
 
     # Ensure the provided path is a valid existing file.
-    if (
-            not os.path.exists(fname_config_file) or
-            not os.path.isfile(fname_config_file)
+    if not os.path.exists(fname_config_file) or not os.path.isfile(
+        fname_config_file
     ):
         msg = "Config file '{0}' not found or not a file."
         msg_fmt = msg.format(fname_config_file)
@@ -114,12 +112,12 @@ def validate_config(config_instance, config_schema=None):
             data=config_instance,
             schema=config_schema,
             required_by_default=False,
-            blank_by_default=True
+            blank_by_default=True,
         )
     # catch any exception resulting from the validation and wrap it in the
     # custom `excs.ConfigFileInvalid` exception.
     except Exception as exc:
-        raise excs.ConfigFileInvalid(exc.message)
+        raise excs.ConfigFileInvalid(str(exc))
 
     return True
 
@@ -145,9 +143,6 @@ def import_config(fname_config_file):
 
     # Validate the loaded `dict` against the `config_schema_default` JSON
     # schema.
-    validate_config(
-        config_instance=config,
-        config_schema=config_schema_default
-    )
+    validate_config(config_instance=config, config_schema=config_schema_default)
 
     return attrdict.AttrDict(config)
