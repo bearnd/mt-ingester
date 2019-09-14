@@ -1,5 +1,9 @@
 ## Changelog
 
+### v0.7.1
+
+- Fixed ingestion script bug.
+
 ### v0.7.0
 
 - Story CH1086: Switch `mt-ingester` Git deployment to GitLab.com.
